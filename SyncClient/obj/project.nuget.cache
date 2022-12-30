@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "KXXRAXjyA/bBxJWvBkGMxIqB9OiGCkeaDnqZCAfzUk5D135/0LMwpHPUO55/TuBo/riP0MY9ZdAwbauO2zwbcw==",
+  "dgSpecHash": "eYAu2RA6FEgK9m9s1g3Qwv0YMBkPdvbm7IJwdnHTSBHm0cGgCoKEUI8NQdvQ0YbbZTAXvTvLSQ3WCR8coG8sHQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\mario\\source\\repos\\SyncClient\\SyncClient\\SyncClient.csproj",
+  "projectFilePath": "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

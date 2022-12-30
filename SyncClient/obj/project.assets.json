@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\mario\\source\\repos\\SyncClient\\SyncClient\\SyncClient.csproj",
+      "projectUniqueName": "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj",
       "projectName": "SyncClient",
-      "projectPath": "C:\\Users\\mario\\source\\repos\\SyncClient\\SyncClient\\SyncClient.csproj",
+      "projectPath": "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj",
       "packagesPath": "C:\\Users\\mario\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\mario\\source\\repos\\SyncClient\\SyncClient\\obj\\",
+      "outputPath": "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\SyncClient\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "D:\\Programme\\MicrosoftVisualStudio\\Shared\\NuGetPackages"

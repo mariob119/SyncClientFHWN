@@ -75,8 +75,8 @@ namespace SyncClient
             Console.WriteLine($"Command: \t'exit'");
             Console.WriteLine($"Description: \tExiting the program!\n");
 
-            Console.WriteLine("Press enter to continue!");
-            Console.ReadLine();
+            Console.WriteLine("Press any key to continue!");
+            Console.ReadKey();
             Console.Clear();
         }
     }
