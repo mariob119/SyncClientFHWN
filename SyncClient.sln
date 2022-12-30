@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32922.545
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyncClient", "SyncClient\SyncClient.csproj", "{CDF38D43-8CF3-49E3-A6CE-FE8B3581B529}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CDF38D43-8CF3-49E3-A6CE-FE8B3581B529}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDF38D43-8CF3-49E3-A6CE-FE8B3581B529}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDF38D43-8CF3-49E3-A6CE-FE8B3581B529}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDF38D43-8CF3-49E3-A6CE-FE8B3581B529}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4AB5A984-6099-43BF-A92B-F3E5C3DAFB21}
+	EndGlobalSection
+EndGlobal
