@@ -28,3 +28,11 @@ C:\Users\mario\Source\Repos\SyncClientFHWN\SyncClient\obj\Debug\net6.0\refint\Sy
 C:\Users\mario\Source\Repos\SyncClientFHWN\SyncClient\obj\Debug\net6.0\SyncClient.pdb
 C:\Users\mario\Source\Repos\SyncClientFHWN\SyncClient\obj\Debug\net6.0\SyncClient.genruntimeconfig.cache
 C:\Users\mario\Source\Repos\SyncClientFHWN\SyncClient\obj\Debug\net6.0\ref\SyncClient.dll
+C:\Users\mario\Source\Repos\SyncClientFHWN\SyncClient\bin\Debug\net6.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\mario\Source\Repos\SyncClientFHWN\SyncClient\bin\Debug\net6.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\mario\Source\Repos\SyncClientFHWN\SyncClient\bin\Debug\net6.0\Microsoft.Extensions.Logging.dll
+C:\Users\mario\Source\Repos\SyncClientFHWN\SyncClient\bin\Debug\net6.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\mario\Source\Repos\SyncClientFHWN\SyncClient\bin\Debug\net6.0\Microsoft.Extensions.Options.dll
+C:\Users\mario\Source\Repos\SyncClientFHWN\SyncClient\bin\Debug\net6.0\Microsoft.Extensions.Primitives.dll
+C:\Users\mario\Source\Repos\SyncClientFHWN\SyncClient\obj\Debug\net6.0\SyncClient.csproj.CopyComplete
+C:\Users\mario\Source\Repos\SyncClientFHWN\SyncClient\bin\Debug\net6.0\IPC.NamedPipe.dll

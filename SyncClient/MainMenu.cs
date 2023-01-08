@@ -9,10 +9,13 @@ namespace SyncClient
 {
     internal static class MainMenu
     {
-        public static void Start()
+        public static void Run()
         {
             List<MenuEntryInfo> MenuEntries = new List<MenuEntryInfo>();
-            MenuEntries.Add(ShowConfiguration.GetMenuEntryInfo());
+            MenuEntries.Add(ShowSyncJobs.GetMenuEntryInfo());
+            MenuEntries.Add(AddSyncJob.GetMenuEntryInfo());
+            MenuEntries.Add(SyncJobDetails.GetMenuEntryInfo());
+            MenuEntries.Add(DeleteSyncJob.GetMenuEntryInfo());
 
             List<String> Commands = new List<String>();
             Commands.Add("help");
@@ -22,19 +25,25 @@ namespace SyncClient
                 Commands.Add(info.Command);
             }
 
-            string a = "b";
-
-            Console.WriteLine("=========================\n");
-            Console.WriteLine("Welcome to Sync Client!\n");
-            Console.WriteLine("=========================\n");
-
             bool Running = true;
             while (Running)
             {
                 string Command = EnterACommand(Commands);
-                if (Command == ShowConfiguration.GetCommand())
+                if (Command == AddSyncJob.GetCommand())
                 {
-                    ShowConfiguration.MainMethode();
+                    AddSyncJob.MainMethode();
+                }
+                if (Command == DeleteSyncJob.GetCommand())
+                {
+                    DeleteSyncJob.MainMethode();
+                }
+                if (Command == SyncJobDetails.GetCommand())
+                {
+                    SyncJobDetails.MainMethode();
+                }
+                if (Command == ShowSyncJobs.GetCommand())
+                {
+                    ShowSyncJobs.MainMethode();
                 }
                 if(Command == "help")
                 {
@@ -47,11 +56,13 @@ namespace SyncClient
             }
         }
         private static string EnterACommand(List<String> Commands) {
+            Functions.WriteHeadLine("Main Menu");
             Console.WriteLine("Enter a command or 'help':");
             string Command = Console.ReadLine();
             Console.Clear();
             while (!Commands.Contains(Command))
             {
+                Functions.WriteHeadLine("Main Menu");
                 Console.WriteLine("Please enter a valid command or enter 'help':");
                 Command = Console.ReadLine();
                 Console.Clear();
@@ -60,9 +71,8 @@ namespace SyncClient
         }
         private static void PrintHelp(List<MenuEntryInfo> menuEntryInfos)
         {
-            Console.WriteLine("=========================\n");
-            Console.WriteLine("HELP-PAGE\n");
-            Console.WriteLine("=========================\n");
+            Console.SetCursorPosition(0, 10);
+            Functions.WriteHeadLine("HELP-PAGE");
 
             foreach(MenuEntryInfo menuEntry in menuEntryInfos)
             {
@@ -75,9 +85,7 @@ namespace SyncClient
             Console.WriteLine($"Command: \t'exit'");
             Console.WriteLine($"Description: \tExiting the program!\n");
 
-            Console.WriteLine("Press any key to continue!");
-            Console.ReadKey();
-            Console.Clear();
+            Functions.PressAnyKeyToContinue();
         }
     }
 }

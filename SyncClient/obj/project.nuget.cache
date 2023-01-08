@@ -1,8 +1,17 @@
 {
   "version": 2,
-  "dgSpecHash": "eYAu2RA6FEgK9m9s1g3Qwv0YMBkPdvbm7IJwdnHTSBHm0cGgCoKEUI8NQdvQ0YbbZTAXvTvLSQ3WCR8coG8sHQ==",
+  "dgSpecHash": "7MnLAsBn0sojdlWPGFnVO6k3NhlkpwQJ+dz377hhppzRQgQ1C7pz1f8k6XUEIJh83memKAunwFMH4an7So8wAA==",
   "success": true,
   "projectFilePath": "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\mario\\.nuget\\packages\\ipc.namedpipe\\0.9.3\\ipc.namedpipe.0.9.3.nupkg.sha512",
+    "C:\\Users\\mario\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\7.0.0\\microsoft.extensions.dependencyinjection.7.0.0.nupkg.sha512",
+    "C:\\Users\\mario\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\7.0.0\\microsoft.extensions.dependencyinjection.abstractions.7.0.0.nupkg.sha512",
+    "C:\\Users\\mario\\.nuget\\packages\\microsoft.extensions.logging\\7.0.0\\microsoft.extensions.logging.7.0.0.nupkg.sha512",
+    "C:\\Users\\mario\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\7.0.0\\microsoft.extensions.logging.abstractions.7.0.0.nupkg.sha512",
+    "C:\\Users\\mario\\.nuget\\packages\\microsoft.extensions.options\\7.0.0\\microsoft.extensions.options.7.0.0.nupkg.sha512",
+    "C:\\Users\\mario\\.nuget\\packages\\microsoft.extensions.primitives\\7.0.0\\microsoft.extensions.primitives.7.0.0.nupkg.sha512",
+    "C:\\Users\\mario\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
+  ],
   "logs": []
 }
