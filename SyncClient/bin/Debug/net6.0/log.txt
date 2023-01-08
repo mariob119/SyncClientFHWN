@@ -1,0 +1,5 @@
+Copied C:\1\Textdokument (neu) - Kopie (2).txt to C:\2\Textdokument (neu) - Kopie (2).txt
+Copied C:\1\Textdokument (neu) - Kopie (3).txt to C:\2\Textdokument (neu) - Kopie (3).txt
+File C:\1\Textdokument (neu) - Kopie (4).txt is being used by another Process!
+Copied C:\1\Textdokument (neu) - Kopie (4).txt to C:\2\Textdokument (neu) - Kopie (4).txt
+Copied C:\1\Textdokument (neu) - Kopie (5).txt to C:\2\Textdokument (neu) - Kopie (5).txt

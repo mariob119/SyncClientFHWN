@@ -29,12 +29,37 @@ namespace SyncClient.MenuEntries
             string RootDirectory = Functions.EnterAValidDirectory();
             config.SetSourceDirectory(RootDirectory);
 
+            List<string> TargetDirectories = new List<string>();
+            foreach (SyncJobConfiguration syncJobConfiguration in SyncJobs.SyncJobConfigurations)
+            {
+                foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
+                {
+                    TargetDirectories.Add(TargetDirectory);
+                }
+            }
+
             Console.Write("Enter how many target directories you want to add: ");
             int NumberOfTargetDirectories = Functions.GetAPositiveNumber();
             for(int i = 1; i < NumberOfTargetDirectories+1; i++)
             {
                 Console.Write($"Enter target directory number {i}: ");
-                config.AddTargetDirectory(Functions.EnterAValidDirectory());
+                bool IsValid = false;
+                string DirectoryPath = String.Empty;
+                while (IsValid == false)
+                {
+                    DirectoryPath = Functions.EnterAValidDirectory();
+                    if (config.TargetDirectories.Contains(DirectoryPath))
+                    {
+                        Console.WriteLine("The directory you have entered is already a target direcotry!");
+                    }
+                    else if (TargetDirectories.Contains( DirectoryPath))
+                    {
+                        Console.WriteLine("The target directory you have entered is already used by another job!");
+                    }
+                    else { IsValid = true; }
+                }
+                
+                config.AddTargetDirectory(DirectoryPath);
             }
 
             Console.WriteLine("Should subdirectories be included? (true or false)?");
@@ -45,7 +70,7 @@ namespace SyncClient.MenuEntries
             for (int i = 1; i < NumberOfExcludedDirectories + 1; i++)
             {
                 Console.Write($"Enter excluded directory number {i}: {config.GetSourceDirectory()}\\");
-                config.AddExcludedDirectory(Functions.EnterAValidDirectoryWithPrefix(config.GetSourceDirectory()));
+                config.AddExcludedDirectory(Functions.EnterADirectoryWithPrefix(config.GetSourceDirectory()));
             }
 
             SyncJobs.AddConfiguration(config);

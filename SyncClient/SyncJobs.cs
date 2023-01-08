@@ -15,12 +15,14 @@ namespace SyncClient
         private static ConcurrentQueue<JobInstruction>? JobInstructions;
         private static List<FileSystemWatcher>? FileSystemWatchers;
         private static Timer? ScanDirectoriesTimer;
+        private static Configs Configurations;
 
         public static void InitSyncJobs()
         {
             SyncJobConfigurations = new List<SyncJobConfiguration>();
             JobInstructions = new ConcurrentQueue<JobInstruction>();
             FileSystemWatchers = new List<FileSystemWatcher>();
+            Configurations = new Configs();
             //ScanDirectoriesTimer = new Timer(new TimerCallback(ScanDirectories), null, 1000, 1000);
         }
         public static void LoadConfigurations()
@@ -102,6 +104,8 @@ namespace SyncClient
         {
             string JsonSettings = JsonSerializer.Serialize(SyncJobConfigurations);
             File.WriteAllText("syncjobs.json", JsonSettings);
+            string Configs = JsonSerializer.Serialize(Configurations);
+            File.WriteAllText("configs.json", Configs);
         }
         public static void HealthCheck()
         {
@@ -211,27 +215,33 @@ namespace SyncClient
                 {
                     foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
                     {
-                        FileAttributes attr = File.GetAttributes(e.FullPath);
-                        if (attr.HasFlag(FileAttributes.Directory))
+                        foreach (string ExcludedDiretory in syncJobConfiguration.ExcludedDiretories)
                         {
-                            JobInstruction jobInstruction = new JobInstruction(syncJobConfiguration.SourceDiretory, e.FullPath, TargetDirectory, true);
-                            if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
+                            if (!e.FullPath.Contains(ExcludedDiretory + "\\"))
                             {
-                                JobInstructions.Enqueue(jobInstruction);
-                                //Console.WriteLine("Directory");
-                            }
-                        }
-                        else
-                        {
-                            string RelativeFileName = e.FullPath.Replace(syncJobConfiguration.SourceDiretory, "");
-                            string NewFilePath = Path.Combine(TargetDirectory, RelativeFileName);
-                            if (!File.Exists(NewFilePath))
-                            {
-                                JobInstruction jobInstruction = new JobInstruction(syncJobConfiguration.SourceDiretory, TargetDirectory, e.FullPath);
-                                if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
+                                FileAttributes attr = File.GetAttributes(e.FullPath);
+                                if (attr.HasFlag(FileAttributes.Directory))
                                 {
-                                    JobInstructions.Enqueue(jobInstruction);
-                                    //Console.WriteLine("File");
+                                    JobInstruction jobInstruction = new JobInstruction(syncJobConfiguration.SourceDiretory, e.FullPath, TargetDirectory, true);
+                                    if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
+                                    {
+                                        JobInstructions.Enqueue(jobInstruction);
+                                        //Console.WriteLine("Directory");
+                                    }
+                                }
+                                else
+                                {
+                                    string RelativeFileName = e.FullPath.Replace(syncJobConfiguration.SourceDiretory, "");
+                                    string NewFilePath = Path.Combine(TargetDirectory, RelativeFileName);
+                                    if (!File.Exists(NewFilePath))
+                                    {
+                                        JobInstruction jobInstruction = new JobInstruction(syncJobConfiguration.SourceDiretory, TargetDirectory, e.FullPath);
+                                        if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
+                                        {
+                                            JobInstructions.Enqueue(jobInstruction);
+                                            //Console.WriteLine("File");
+                                        }
+                                    }
                                 }
                             }
                         }

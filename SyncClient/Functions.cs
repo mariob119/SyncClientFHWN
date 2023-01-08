@@ -81,14 +81,14 @@ namespace SyncClient
             }
             return Input;
         }
-        public static string EnterAValidDirectoryWithPrefix(string Prefix)
+        public static string EnterADirectoryWithPrefix(string Prefix)
         {
             string Input = Prefix + "\\" + EnterNotEmptyString();
-            while (!CheckIfDirectoryExists(Input))
-            {
-                Console.Write($"Please enter a valid direcotry: {Prefix}\\");
-                Input = Prefix + "\\" + EnterNotEmptyString();
-            }
+            //while (!CheckIfDirectoryExists(Input))
+            //{
+            //    Console.Write($"Please enter a valid direcotry: {Prefix}\\");
+            //    Input = Prefix + "\\" + EnterNotEmptyString();
+            //}
             return Input;
         }
         public static bool CheckIfDirectoryExists(string DirectoryPath)

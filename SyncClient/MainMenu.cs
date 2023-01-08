@@ -71,7 +71,6 @@ namespace SyncClient
         }
         private static void PrintHelp(List<MenuEntryInfo> menuEntryInfos)
         {
-            Console.SetCursorPosition(0, 10);
             Functions.WriteHeadLine("HELP-PAGE");
 
             foreach(MenuEntryInfo menuEntry in menuEntryInfos)

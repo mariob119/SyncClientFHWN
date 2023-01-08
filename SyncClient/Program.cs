@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.IO;
 
 namespace SyncClient
 {
@@ -10,11 +11,10 @@ namespace SyncClient
             SyncJobs.InitSyncJobs();
             SyncJobs.LoadConfigurations();
             SyncJobs.HealthCheck();
-
-            Console.SetCursorPosition(0, 10);
-
+            LoggingConsole.Start();
             MainMenu.Run();
             SyncJobs.SaveConfigurations();
+            LoggingConsole.Stop();
         }
     }
 }
