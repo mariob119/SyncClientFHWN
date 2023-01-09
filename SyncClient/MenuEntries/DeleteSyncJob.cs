@@ -52,7 +52,7 @@ namespace SyncClient.MenuEntries
                 SyncJobs.SyncJobConfigurations.RemoveAt(0);
                 Console.WriteLine("\nSync job has been removed successfully!");
                 SyncJobs.SaveConfigurations();
-                SyncJobs.ReloadFileSystemWatchers();
+                SyncJobs.RefreshSyncJobs();
             } 
             else
             {
@@ -72,7 +72,7 @@ namespace SyncClient.MenuEntries
                 SyncJobs.SyncJobConfigurations.RemoveAt(SyncJobNumber);
                 Console.WriteLine("\nSync job has been removed successfully!");
                 SyncJobs.SaveConfigurations();
-                SyncJobs.ReloadFileSystemWatchers();
+                SyncJobs.RefreshSyncJobs();
             }
             else
             {

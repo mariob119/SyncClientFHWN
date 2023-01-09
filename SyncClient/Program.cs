@@ -8,11 +8,16 @@ namespace SyncClient
     {
         static void Main(string[] args)
         {
-            SyncJobs.InitSyncJobs();
+            SyncJobs.Init();
             SyncJobs.LoadConfigurations();
             SyncJobs.HealthCheck();
-            LoggingConsole.Start();
+            SyncJobs.StartSyncJobs();
+
+            SyncJobs.ScanDirectories();
+            //SyncJobs.test("C:\\1");
+            LoggingConsole.Run();
             MainMenu.Run();
+
             SyncJobs.SaveConfigurations();
             LoggingConsole.Stop();
         }

@@ -11,7 +11,7 @@ namespace SyncClient
     public static class LoggingConsole
     {
         private static Process p = new Process();
-        public static void Start()
+        public static void Run()
         {
             string now = Directory.GetCurrentDirectory();
             string new1 = now.Replace("SyncClient\\bin\\Debug\\net6.0", "");

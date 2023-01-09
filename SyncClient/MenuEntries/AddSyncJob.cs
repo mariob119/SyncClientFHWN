@@ -75,7 +75,7 @@ namespace SyncClient.MenuEntries
 
             SyncJobs.AddConfiguration(config);
             SyncJobs.SaveConfigurations();
-            SyncJobs.ReloadFileSystemWatchers();
+            SyncJobs.RefreshSyncJobs();
             Console.WriteLine($"\nSync Job Number {SyncJobs.SyncJobConfigurations.Count()} has been added successfully!");
             SyncJobs.HealthCheck();
             Functions.PressAnyKeyToContinue();
