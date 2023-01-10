@@ -9,7 +9,7 @@ namespace SyncClient
 {
     internal static class Logger
     {
-        public static object _lock = new object();
+        readonly static object _lock = new object();
         public static void log(string Message)
         {
             lock (_lock)

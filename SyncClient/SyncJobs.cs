@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SyncClient
 {
@@ -18,148 +21,23 @@ namespace SyncClient
         private static Timer? ScanDirectoriesTimer;
         private static Configs Configurations;
 
+        // SyncJob Configurations
+
         public static void Init()
         {
             SyncJobConfigurations = new List<SyncJobConfiguration>();
             JobInstructions = new ConcurrentQueue<JobInstruction>();
             FileSystemWatchers = new List<FileSystemWatcher>();
             Configurations = new Configs();
-            //ScanDirectoriesTimer = new Timer(new TimerCallback(ScanDirectories), null, 1000, 1000);
+            ScanDirectoriesTimer = new Timer(new TimerCallback(ScanDirectories), null, 2000, 1000);
         }
-        public static void LoadConfigurations()
-        {
-            if (File.Exists("syncjobs.json"))
-            {
-                string JsonSettings = File.ReadAllText("syncjobs.json");
-                SyncJobConfigurations = JsonSerializer.Deserialize<List<SyncJobConfiguration>>(JsonSettings)!;
-            }
-            if (File.Exists("configs.json"))
-            {
-                string JsonConfigurations = File.ReadAllText("configs.json");
-                Configurations = JsonSerializer.Deserialize<Configs>(JsonConfigurations)!;
-            }
-        }
-        public static void SyncData(object state)
-        {
-            while (!JobInstructions.IsEmpty)
-            {
-                JobInstructions.TryDequeue(out JobInstruction? instruction);
-                if (instruction != null)
-                {
-                    DoSyncInstruction(instruction);
-                }
-            }
-        }
-        public static void DoSyncInstruction(JobInstruction jobInstruction)
-        {
-            switch (jobInstruction.Instruction)
-            {
-                case "COPYFILE":
-                    {
-                        CopyFile(jobInstruction.SourceDirectory, jobInstruction.TargetDirectory, jobInstruction.FileName);
-                        break;
-                    }
-                case "DELETEFILE":
-                    {
-                        DeleteFile(jobInstruction.TargetDirectory, jobInstruction.FileName);
-                        break;
-                    }
-                case "COPYDIRECTORY":
-                    {
-                        CopyDirectory(jobInstruction.SyncJobSourceDirectory, jobInstruction.SourceDirectory, jobInstruction.TargetDirectory);
-                        break;
-                    }
-            }
-        }
-        readonly static object _lock_copyfile = new object();
-        public static void CopyFile(string SourceDirectory, string TargetDirectory, string FileName)
-        {
-            lock (_lock_copyfile)
-            {
-                string RelativeFileName = FileName.Replace(SourceDirectory, "");
-                string SourceFilePath = SourceDirectory + "\\" + RelativeFileName;
-                string TargetFilePath = TargetDirectory + "\\" + RelativeFileName;
-                try
-                {
-                    File.Copy(SourceFilePath, TargetFilePath, true);
-                    Logger.log($"Copied {SourceFilePath} to {TargetFilePath}");
-                }
-                catch
-                {
-                    CreateCopyFileQueue(SourceDirectory, TargetDirectory, FileName);
-                    Logger.log($"File {SourceFilePath} is being used by another Process!");
-                }
-            }
-        }
-        public static object _lock_deletefile = new object();
-        public static void DeleteFile(string TargetDirectory, string FileName)
-        {
-            lock (_lock_deletefile)
-            {
-                try
-                {
-                    Logger.log($"Deletet {TargetDirectory}{FileName}");
-                    File.Delete(TargetDirectory + FileName);
-                }
-                catch
-                {
-                    Logger.log($"File {FileName} is being used by another Process!");
-                }
-            }
-        }
-        public static object _lock_copydirectory = new object();
-        public static void CopyDirectory(string SyncJobSourceDirectory, string SourceDirectory, string TargetDirectory)
-        {
-            lock (_lock_copydirectory)
-            {
-                string DirectoryName = SourceDirectory.Replace(SyncJobSourceDirectory, "");
-                Directory.CreateDirectory(TargetDirectory + DirectoryName);
-            }
-        }
-        public static void SaveConfigurations()
-        {
-            string JsonSettings = JsonSerializer.Serialize(SyncJobConfigurations);
-            File.WriteAllText("syncjobs.json", JsonSettings);
-            string Configs = JsonSerializer.Serialize(Configurations);
-            File.WriteAllText("configs.json", Configs);
-        }
-        public static void HealthCheck()
-        {
-            List<SyncJobConfiguration> RemoveSyncJob = new List<SyncJobConfiguration>();
-            List<string> RemoveTargetDirectories = new List<string>();
-            foreach (SyncJobConfiguration Config in SyncJobConfigurations)
-            {
-                if (!Directory.Exists(Config.GetSourceDirectory()))
-                {
-                    RemoveSyncJob.Add(Config);
-                }
-                foreach (string TargetDirectory in Config.TargetDirectories)
-                {
-                    if (!Directory.Exists(TargetDirectory))
-                    {
-                        RemoveTargetDirectories.Add(TargetDirectory);
-                    }
-                }
-                foreach (string TargetDirectoryToRemove in RemoveTargetDirectories)
-                {
-                    Config.TargetDirectories.Remove(TargetDirectoryToRemove);
-                }
-                if (Config.TargetDirectories.Count == 0)
-                {
-                    RemoveSyncJob.Add(Config);
-                }
-            }
-            foreach (SyncJobConfiguration Config in RemoveSyncJob)
-            {
-                SyncJobConfigurations.Remove(Config);
-            }
-            SyncJobs.SaveConfigurations();
-        }
-        public static object _lock_threadnumber = new object();
         public static void AddConfiguration(SyncJobConfiguration syncJobConfiguration)
         {
             SyncJobConfigurations.Add(syncJobConfiguration);
         }
+
+        // SyncJob Informations
+
         public static void ShowSyncDiretories()
         {
             if (SyncJobConfigurations.Count > 0)
@@ -205,6 +83,93 @@ namespace SyncClient
             }
             else { Console.WriteLine("\nFolder with this index does not exist!"); }
         }
+
+        // SyncJob Operations
+
+        public static void SyncData(object state)
+        {
+            while (!JobInstructions.IsEmpty)
+            {
+                JobInstructions.TryDequeue(out JobInstruction? instruction);
+                if (instruction != null)
+                {
+                    DoSyncInstruction(instruction);
+                }
+            }
+        }
+        readonly static object _sync_locker = new object();
+        public static void DoSyncInstruction(JobInstruction jobInstruction)
+        {
+            lock (_sync_locker)
+            {
+                switch (jobInstruction.Instruction)
+                {
+                    case "COPYFILE":
+                        {
+                            CopyFile(jobInstruction.SourceDirectory, jobInstruction.TargetDirectory, jobInstruction.FileName);
+                            break;
+                        }
+                    case "DELETEFILE":
+                        {
+                            DeleteFile(jobInstruction.TargetDirectory, jobInstruction.FileName);
+                            break;
+                        }
+                    case "COPYDIRECTORY":
+                        {
+                            CopyDirectory(jobInstruction.SyncJobSourceDirectory, jobInstruction.SourceDirectory, jobInstruction.TargetDirectory);
+                            break;
+                        }
+                    case "DELETEDIRECTORY":
+                        {
+                            DeleteDirectory(jobInstruction.TargetDirectory);
+                            break;
+                        }
+                }
+            }
+        }
+        public static void ScanDirectories(object state)
+        {
+            MirrorAllDirectoriesOfSyncJobs(SyncJobConfigurations);
+            //foreach (SyncJobConfiguration syncJobConfiguration in SyncJobConfigurations)
+            //{
+            //    foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
+            //    {
+            //        //CompareTwoDiretories(syncJobConfiguration.SourceDiretory, TargetDirectory);
+            //    }
+
+            //    string[] dirs = Directory.GetDirectories(syncJobConfiguration.SourceDiretory, "*", SearchOption.AllDirectories);
+            //    if (syncJobConfiguration.IncludeSubdiretories)
+            //    {
+            //        foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
+            //        {
+            //            foreach (string dir in dirs)
+            //            {
+            //                foreach (string ExcludedDirectory in syncJobConfiguration.ExcludedDiretories)
+            //                {
+            //                    if (!dir.Contains(ExcludedDirectory + "\\"))
+            //                    {
+            //                        CreateCopyDirectoryQueue(syncJobConfiguration.SourceDiretory, TargetDirectory, dir);
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
+            //foreach (FileSystemWatcher fileSystemWatcher in FileSystemWatchers)
+            //{
+            //    fileSystemWatcher.EnableRaisingEvents = false;
+            //}
+            ////CompareTwoDiretories("C:\\1", "C:\\2");
+            //foreach (FileSystemWatcher fileSystemWatcher in FileSystemWatchers)
+            //{
+            //    fileSystemWatcher.EnableRaisingEvents = true;
+            //}
+            //ThreadPool.QueueUserWorkItem(SyncData);
+        }
+        public static void StartJobWorker()
+        {
+            ThreadPool.QueueUserWorkItem(SyncData);
+        }
         public static void StartSyncJobs()
         {
             foreach (SyncJobConfiguration syncJobConfiguration in SyncJobConfigurations)
@@ -218,6 +183,156 @@ namespace SyncClient
             HealthCheck();
             StartSyncJobs();
         }
+
+        // Configuration Operations
+
+        public static void LoadConfigurations()
+        {
+            if (File.Exists("syncjobs.json"))
+            {
+                string JsonSettings = File.ReadAllText("syncjobs.json");
+                SyncJobConfigurations = JsonSerializer.Deserialize<List<SyncJobConfiguration>>(JsonSettings)!;
+            }
+            if (File.Exists("configs.json"))
+            {
+                string JsonConfigurations = File.ReadAllText("configs.json");
+                Configurations = JsonSerializer.Deserialize<Configs>(JsonConfigurations)!;
+            }
+        }
+        public static void SaveConfigurations()
+        {
+            string JsonSettings = JsonSerializer.Serialize(SyncJobConfigurations);
+            File.WriteAllText("syncjobs.json", JsonSettings);
+            string Configs = JsonSerializer.Serialize(Configurations);
+            File.WriteAllText("configs.json", Configs);
+        }
+        public static void HealthCheck()
+        {
+            List<SyncJobConfiguration> RemoveSyncJob = new List<SyncJobConfiguration>();
+            List<string> RemoveTargetDirectories = new List<string>();
+            foreach (SyncJobConfiguration Config in SyncJobConfigurations)
+            {
+                if (!Directory.Exists(Config.GetSourceDirectory()))
+                {
+                    RemoveSyncJob.Add(Config);
+                }
+                foreach (string TargetDirectory in Config.TargetDirectories)
+                {
+                    if (!Directory.Exists(TargetDirectory))
+                    {
+                        RemoveTargetDirectories.Add(TargetDirectory);
+                    }
+                }
+                foreach (string TargetDirectoryToRemove in RemoveTargetDirectories)
+                {
+                    Config.TargetDirectories.Remove(TargetDirectoryToRemove);
+                }
+                if (Config.TargetDirectories.Count == 0)
+                {
+                    RemoveSyncJob.Add(Config);
+                }
+            }
+            foreach (SyncJobConfiguration Config in RemoveSyncJob)
+            {
+                SyncJobConfigurations.Remove(Config);
+            }
+            SyncJobs.SaveConfigurations();
+        }
+
+        // File and Folder Operations
+
+        readonly static object _lock_copyfile = new object();
+        public static void CopyFile(string SourceDirectory, string TargetDirectory, string FileName)
+        {
+            lock (_lock_copyfile)
+            {
+                string RelativeFileName = FileName.Replace(SourceDirectory, "");
+                string SourceFilePath = SourceDirectory + "\\" + RelativeFileName;
+                string TargetFilePath = TargetDirectory + "\\" + RelativeFileName;
+                try
+                {
+                    File.Copy(SourceFilePath, TargetFilePath, true);
+                    Logger.log($"Copied {SourceFilePath} to {TargetFilePath}");
+                }
+                catch
+                {
+                    Logger.log($"File {SourceFilePath} is being used by another Process!");
+                }
+            }
+        }
+        readonly static object _lock_deletefile = new object();
+        public static void DeleteFile(string TargetDirectory, string RelativeFileName)
+        {
+            lock (_lock_deletefile)
+            {
+                string FullFilePath = TargetDirectory + "\\" + RelativeFileName;
+                try
+                {
+                    File.Delete(FullFilePath);
+                    Logger.log($"Deleted {FullFilePath}");
+                }
+                catch
+                {
+                    Logger.log($"File {FullFilePath} is being used by another Process!");
+                }
+            }
+        }
+        readonly static object _lock_copydirectory = new object();
+        public static void CopyDirectory(string SyncJobSourceDirectory, string SourceDirectory, string TargetDirectory)
+        {
+            lock (_lock_copydirectory)
+            {
+                string DirectoryName = SourceDirectory.Replace(SyncJobSourceDirectory, "");
+                Directory.CreateDirectory(TargetDirectory + DirectoryName);
+            }
+        }
+        readonly static object _lock_delete_directory = new object();
+        public static void DeleteDirectory(string DirectoryPath)
+        {
+            lock (_lock_delete_directory)
+            {
+                if (Directory.Exists(DirectoryPath))
+                {
+                    Directory.Delete(DirectoryPath, true);
+                }
+            }
+        }
+
+        // Create File and Folder Jobs
+
+        private static void CreateDeleteFileQueue(string TargetDirectory, string RelativeFileName)
+        {
+            JobInstruction jobInstruction = new JobInstruction(TargetDirectory, RelativeFileName);
+            if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
+            {
+                JobInstructions.Enqueue(jobInstruction);
+            }
+        }
+        private static void CreateCopyFileQueue(string SyncJobSourceDirectory, string SyncJobTargetDirectory, string FilePath)
+        {
+            string RelativeFileName = FilePath.Replace(SyncJobSourceDirectory, "");
+            string NewFilePath = Path.Combine(SyncJobTargetDirectory, RelativeFileName);
+            if (!File.Exists(NewFilePath))
+            {
+                JobInstruction jobInstruction = new JobInstruction(SyncJobSourceDirectory, SyncJobTargetDirectory, FilePath);
+                if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
+                {
+                    JobInstructions.Enqueue(jobInstruction);
+                    //Console.WriteLine("File");
+                }
+            }
+        }
+        private static void CreateCopyDirectoryQueue(string SyncJobSourceDirectory, string SyncJobTargetDirectory, string DirectoryPath)
+        {
+            JobInstruction jobInstruction = new JobInstruction(SyncJobSourceDirectory, DirectoryPath, SyncJobTargetDirectory, true);
+            if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
+            {
+                JobInstructions.Enqueue(jobInstruction);
+            }
+        }
+
+        // File System Watchers
+
         public static FileSystemWatcher MyWatcherFactory(SyncJobConfiguration syncJobConfiguration)
         {
             FileSystemWatcher watcher = new FileSystemWatcher(syncJobConfiguration.SourceDiretory);
@@ -253,7 +368,7 @@ namespace SyncClient
                                 FileAttributes attr = File.GetAttributes(e.FullPath);
                                 if (attr.HasFlag(FileAttributes.Directory))
                                 {
-                                    CreateCopyFolderQueue(syncJobConfiguration.SourceDiretory, TargetDirectory, e.FullPath);
+                                    CreateCopyDirectoryQueue(syncJobConfiguration.SourceDiretory, TargetDirectory, e.FullPath);
                                 }
                                 else
                                 {
@@ -274,101 +389,127 @@ namespace SyncClient
                 {
                     foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
                     {
-                        Console.WriteLine(e.FullPath);
                         string RelativeFileName = e.FullPath.Replace(syncJobConfiguration.SourceDiretory, "");
-                        JobInstruction jobInstruction = new JobInstruction(TargetDirectory, RelativeFileName);
-                        if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
-                        {
-                            Console.WriteLine(e.FullPath);
-                            JobInstructions.Enqueue(jobInstruction);
-                        }
+                        //JobInstruction jobInstruction = new JobInstruction(TargetDirectory, RelativeFileName);
+                        //if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
+                        //{
+                        //    Console.WriteLine(e.FullPath);
+                        //    JobInstructions.Enqueue(jobInstruction);
+                        //}
+                        CreateDeleteFileQueue(TargetDirectory, RelativeFileName);
                     }
                 }
             }
             ThreadPool.QueueUserWorkItem(SyncData);
         }
-        private static void CreateCopyFileQueue(string SyncJobSourceDirectory, string SyncJobTargetDirectory, string FilePath)
+
+        // Mirror all Directories of SyncJobs with Configurations
+
+        public static void MirrorAllDirectoriesOfSyncJobs(List<SyncJobConfiguration> syncJobConfigurations)
         {
-            string RelativeFileName = FilePath.Replace(SyncJobSourceDirectory, "");
-            string NewFilePath = Path.Combine(SyncJobTargetDirectory, RelativeFileName);
-            if (!File.Exists(NewFilePath))
-            {
-                JobInstruction jobInstruction = new JobInstruction(SyncJobSourceDirectory, SyncJobTargetDirectory, FilePath);
-                if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
-                {
-                    JobInstructions.Enqueue(jobInstruction);
-                    //Console.WriteLine("File");
-                }
-            }
-        }
-        private static void CreateCopyFolderQueue(string SyncJobSourceDirectory, string SyncJobTargetDirectory, string DirectoryPath)
-        {
-            JobInstruction jobInstruction = new JobInstruction(SyncJobSourceDirectory, DirectoryPath, SyncJobTargetDirectory, true);
-            if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
-            {
-                JobInstructions.Enqueue(jobInstruction);
-                //Console.WriteLine("Directory");
-            }
-        }
-        public static void ScanDirectories()
-        {
-            foreach (SyncJobConfiguration syncJobConfiguration in SyncJobConfigurations)
+            foreach (SyncJobConfiguration syncJobConfiguration in syncJobConfigurations)
             {
                 foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
                 {
-                    CompareTwoDiretories(syncJobConfiguration.SourceDiretory, TargetDirectory);
-                }
+                    MirrorFilesFromSourceToTarget(syncJobConfiguration.SourceDiretory, TargetDirectory, false, false);
 
-                string[] dirs = Directory.GetDirectories(syncJobConfiguration.SourceDiretory, "*", SearchOption.AllDirectories);
-                if (syncJobConfiguration.IncludeSubdiretories)
-                {
-                    foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
+                    if (syncJobConfiguration.IncludeSubdiretories)
                     {
-                        foreach (string dir in dirs)
+                        string[] SourceDirectories = Directory.GetDirectories(syncJobConfiguration.SourceDiretory, "*", SearchOption.AllDirectories);
+                        string[] DirectoriesInTargetDirectory = Directory.GetDirectories(TargetDirectory, "*", SearchOption.AllDirectories);
+
+                        foreach (string SourceDirectory in SourceDirectories)
                         {
-                            foreach (string ExcludedDirectory in syncJobConfiguration.ExcludedDiretories)
+                            if (!syncJobConfiguration.ExcludedDiretories.Contains(SourceDirectory))
                             {
-                                if (!dir.Contains(ExcludedDirectory + "\\"))
-                                {
-                                    CreateCopyFolderQueue(syncJobConfiguration.SourceDiretory, TargetDirectory, dir);
-                                }
+                                string SourceDirectoryName = SourceDirectory.Replace(syncJobConfiguration.SourceDiretory, "");
+                                string SubTargetDirectory = TargetDirectory + SourceDirectoryName;
+
+                                Directory.CreateDirectory(SubTargetDirectory);
+                                
+                                MirrorDirectoryContentFromSourceToTarget(SourceDirectory, SubTargetDirectory, false);
+                            }
+                        }
+                        foreach (string TargetDir in DirectoriesInTargetDirectory)
+                        {
+                            if (!SourceDirectories.Contains(TargetDir.Replace(TargetDirectory, syncJobConfiguration.SourceDiretory)))
+                            {
+                                DeleteAllFilesFromDirectory(TargetDir);
                             }
                         }
                     }
+                    DeleteAllEmptyDirectoriesWhichAreNotInSource(syncJobConfiguration.SourceDiretory, TargetDirectory, false);
+                    StartJobWorker();
+
                 }
             }
-            ThreadPool.QueueUserWorkItem(SyncData);
         }
-        public static void test(string Path1)
+        public static void MirrorDirectoryContentFromSourceToTarget(string SourcePath, string TargetPath, bool JobWorker)
         {
-            string[] dirs = Directory.GetDirectories(Path1, "*", SearchOption.AllDirectories);
+            string[] Directories = Directory.GetDirectories(SourcePath, "*", SearchOption.AllDirectories);
 
-            foreach (string dir in dirs)
+            foreach (string Dir in Directories)
             {
-                CreateCopyFolderQueue(Path1, "C:\\2", dir);
-                Console.WriteLine(dir);
+                CreateCopyDirectoryQueue(SourcePath, TargetPath, Dir);
             }
-            CompareTwoDiretories("C:\\1", "C:\\2");
-            ThreadPool.QueueUserWorkItem(SyncData);
+
+            MirrorFilesFromSourceToTarget(SourcePath, TargetPath, true, false);
+
+            DeleteAllEmptyDirectoriesWhichAreNotInSource(SourcePath, TargetPath, false);
+
+            if (JobWorker)
+            {
+                StartJobWorker();
+            }
         }
-        public static void CompareTwoDiretories(string SourcePath, string TargetPath)
+        public static void DeleteAllEmptyDirectoriesWhichAreNotInSource(string SourcePath, string TargetPath, bool JobWorker)
+        {
+            string[] SourceDirectories = Directory.GetDirectories(SourcePath, "*", SearchOption.AllDirectories);
+            string[] TargetDirectories = Directory.GetDirectories(TargetPath, "*", SearchOption.AllDirectories);
+
+            bool Remove = false;
+            foreach (string TargetDirectory in TargetDirectories)
+            {
+                foreach (string SourceDirectory in SourceDirectories)
+                {
+                    if (TargetDirectory.Replace(TargetPath, "") == SourceDirectory.Replace(SourcePath, ""))
+                    {
+                        Remove = false; break;
+                    }
+                    else
+                    {
+                        Remove = true;
+                    }
+                }
+                if (Remove || SourceDirectories.Count() == 0)
+                {
+                    JobInstruction jobInstruction = new JobInstruction(TargetDirectory, true);
+                    if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
+                    {
+                        JobInstructions.Enqueue(jobInstruction);
+                    }
+                }
+            }
+            if (JobWorker)
+            {
+                StartJobWorker();
+            }
+        }
+        public static void MirrorFilesFromSourceToTarget(string SourcePath, string TargetPath, bool IncludeSubDirectories, bool JobWorker)
         {
             DirectoryInfo dir1 = new DirectoryInfo(SourcePath);
             DirectoryInfo dir2 = new DirectoryInfo(TargetPath);
 
-            IEnumerable<FileInfo> SourceList = dir1.GetFiles("*.*",
-            SearchOption.TopDirectoryOnly);
+            IEnumerable<FileInfo> SourceList = GetFilesOfDirectory(dir1, IncludeSubDirectories);
 
-            IEnumerable<FileInfo> TargetList = dir2.GetFiles("*.*",
-            SearchOption.TopDirectoryOnly);
+            IEnumerable<FileInfo> TargetList = GetFilesOfDirectory(dir2, IncludeSubDirectories);
 
-            bool Remove;
+            bool Remove = false;
             foreach (FileInfo TargetFile in TargetList)
             {
-                Remove = false;
                 foreach (FileInfo SourceFile in SourceList)
                 {
-                    if (TargetFile.Name == SourceFile.Name)
+                    if (TargetFile.FullName.Replace(TargetPath, "") == SourceFile.FullName.Replace(SourcePath, ""))
                     {
                         Remove = false; break;
                     }
@@ -379,51 +520,66 @@ namespace SyncClient
                 }
                 if (Remove || SourceList.Count() == 0)
                 {
-                    JobInstruction jobInstruction = new JobInstruction(TargetPath, TargetFile.Name);
+                    JobInstruction jobInstruction = new JobInstruction(TargetPath, TargetFile.FullName.Replace(TargetPath, ""));
                     if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
                     {
                         JobInstructions.Enqueue(jobInstruction);
                     }
                 }
             }
-            bool Add;
+            bool Add = true;
             foreach (FileInfo SourceFile in SourceList)
             {
-                Add = false;
                 foreach (FileInfo TargetFile in TargetList)
                 {
-                    if (SourceFile.Name == TargetFile.Name)
+                    if (SourceFile.FullName.Replace(SourcePath, "") == TargetFile.FullName.Replace(TargetPath, ""))
                     {
-                        if (CompareTwoFiles(SourceFile.FullName, TargetFile.FullName))
-                        {
-                            Add = false; break;
-                        }
+                        SetAttributes(SourceFile.FullName, TargetFile.FullName);
+                        Add = false; break;
                     }
                     else
                     {
                         Add = true;
                     }
                 }
-                if (true || !TargetList.Any())
+                if (Add || TargetList.Count() == 0)
                 {
-                    JobInstruction jobInstruction = new JobInstruction(SourcePath, TargetPath, SourceFile.Name);
+                    JobInstruction jobInstruction = new JobInstruction(SourcePath, TargetPath, SourceFile.FullName);
                     if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
                     {
                         JobInstructions.Enqueue(jobInstruction);
                     }
                 }
             }
-            ThreadPool.QueueUserWorkItem(SyncData);
+            if (JobWorker) { StartJobWorker(); }
         }
-        public static bool CompareTwoFiles(string SourcePath, string TargetPath)
+        public static void DeleteAllFilesFromDirectory(string DirectoryPath)
         {
-            if (File.GetAttributes(SourcePath) == File.GetAttributes(TargetPath))
+            DirectoryInfo Dir = new DirectoryInfo(DirectoryPath);
+
+            IEnumerable<FileInfo> FileList = GetFilesOfDirectory(Dir, true);
+
+            foreach (FileInfo DirectoryFile in FileList)
             {
-                return true;
+                CreateDeleteFileQueue(DirectoryPath, DirectoryFile.FullName.Replace(DirectoryPath, ""));
             }
-            else
+        }
+        public static IEnumerable<FileInfo> GetFilesOfDirectory(DirectoryInfo Dir, bool IncludeSubDiretories)
+        {
+                if (IncludeSubDiretories)
+                {
+                    return Dir.GetFiles("*.*", SearchOption.AllDirectories);
+                }
+                else
+                {
+                    return Dir.GetFiles("*.*", SearchOption.TopDirectoryOnly);
+                }
+        }
+        public static void SetAttributes(string SourcePath, string TargetPath)
+        {
+            if (File.GetAttributes(SourcePath) != File.GetAttributes(TargetPath))
             {
-                return false;
+                File.SetAttributes(TargetPath, File.GetAttributes(SourcePath));
             }
         }
     }

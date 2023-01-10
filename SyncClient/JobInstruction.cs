@@ -35,5 +35,11 @@ namespace SyncClient
             this.TargetDirectory = TargetDirectory;
             this.SyncJobSourceDirectory = SyncJobSourceDirectory;
         }
+        public JobInstruction(string DirectoryPath, bool IsDirectory)
+        {
+            this.Instruction = "DELETEDIRECTORY";
+            this.IsDirectory = IsDirectory;
+            this.TargetDirectory = DirectoryPath;
+        }
     }
 }

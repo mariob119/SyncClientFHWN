@@ -11,10 +11,9 @@ namespace SyncClient
             SyncJobs.Init();
             SyncJobs.LoadConfigurations();
             SyncJobs.HealthCheck();
-            SyncJobs.StartSyncJobs();
 
-            SyncJobs.ScanDirectories();
-            //SyncJobs.test("C:\\1");
+            //SyncJobs.MirrorAllDirectoriesOfSyncJobs(SyncJobs.SyncJobConfigurations);
+
             LoggingConsole.Run();
             MainMenu.Run();
 
