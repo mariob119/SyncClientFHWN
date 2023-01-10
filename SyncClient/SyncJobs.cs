@@ -29,7 +29,12 @@ namespace SyncClient
             JobInstructions = new ConcurrentQueue<JobInstruction>();
             FileSystemWatchers = new List<FileSystemWatcher>();
             Configurations = new Config();
-            ScanDirectoriesTimer = new Timer(new TimerCallback(ScanDirectories), null, 0, 1000);
+        }
+        public static void SynchronizeDirectories()
+        {
+            Thread InitSync = new Thread(ScanDirectories);
+            InitSync.Start();
+            StartJobWorker();
         }
         public static void AddConfiguration(SyncJobConfiguration syncJobConfiguration)
         {
@@ -130,41 +135,6 @@ namespace SyncClient
         public static void ScanDirectories(object state)
         {
             MirrorAllDirectoriesOfSyncJobs(SyncJobConfigurations);
-            //foreach (SyncJobConfiguration syncJobConfiguration in SyncJobConfigurations)
-            //{
-            //    foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
-            //    {
-            //        //CompareTwoDiretories(syncJobConfiguration.SourceDiretory, TargetDirectory);
-            //    }
-
-            //    string[] dirs = Directory.GetDirectories(syncJobConfiguration.SourceDiretory, "*", SearchOption.AllDirectories);
-            //    if (syncJobConfiguration.IncludeSubdiretories)
-            //    {
-            //        foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
-            //        {
-            //            foreach (string dir in dirs)
-            //            {
-            //                foreach (string ExcludedDirectory in syncJobConfiguration.ExcludedDiretories)
-            //                {
-            //                    if (!dir.Contains(ExcludedDirectory + "\\"))
-            //                    {
-            //                        CreateCopyDirectoryQueue(syncJobConfiguration.SourceDiretory, TargetDirectory, dir);
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
-            //foreach (FileSystemWatcher fileSystemWatcher in FileSystemWatchers)
-            //{
-            //    fileSystemWatcher.EnableRaisingEvents = false;
-            //}
-            ////CompareTwoDiretories("C:\\1", "C:\\2");
-            //foreach (FileSystemWatcher fileSystemWatcher in FileSystemWatchers)
-            //{
-            //    fileSystemWatcher.EnableRaisingEvents = true;
-            //}
-            //ThreadPool.QueueUserWorkItem(SyncData);
         }
         public static void StartJobWorker()
         {
@@ -202,11 +172,29 @@ namespace SyncClient
                 string JsonConfigurations = File.ReadAllText("configs.json");
                 Configurations = JsonSerializer.Deserialize<Config>(JsonConfigurations)!;
             }
+            if (!Directory.Exists(Configurations.LogFilePath))
+            {
+                Configurations.LogFilePath = "ApplicationDiretory";
+            }
+            if(Configurations.LogFilePath == "ApplicationDiretory")
+            {
+                Configurations.LogFilePath = Directory.GetCurrentDirectory();
+            }
+            if (Configurations.ScanDirectoriesRepeatly)
+            {
+                ScanDirectoriesTimer = new Timer(new TimerCallback(ScanDirectories), null, 1000, Configurations.ScanDiretoriesIntervalInMillis);
+            }
         }
         public static void SaveConfigurations()
         {
             string JsonSettings = JsonSerializer.Serialize(SyncJobConfigurations);
             File.WriteAllText("syncjobs.json", JsonSettings);
+
+            if (!Configurations.LogToDifferentPath)
+            {
+                Configurations.LogFilePath = "ApplicationDiretory";
+            }
+
             string Configs = JsonSerializer.Serialize(Configurations);
             File.WriteAllText("configs.json", Configs);
         }
