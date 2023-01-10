@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mario\\source\\repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj": {}
+    "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mario\\source\\repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj": {
+    "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mario\\source\\repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj",
+        "projectUniqueName": "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj",
         "projectName": "SyncClient",
-        "projectPath": "C:\\Users\\mario\\source\\repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj",
+        "projectPath": "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj",
         "packagesPath": "C:\\Users\\mario\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mario\\source\\repos\\SyncClientFHWN\\SyncClient\\obj\\",
+        "outputPath": "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\SyncClient\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "D:\\Programme\\MicrosoftVisualStudio\\Shared\\NuGetPackages"

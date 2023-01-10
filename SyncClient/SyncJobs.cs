@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SyncClient.JobTypes;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,22 +14,62 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace SyncClient
 {
-    static class SyncJobs
+    class SyncJobs
     {
+        public Dictionary<string, ConcurrentQueue<IJob>>? Jobs;
+        //public ConcurrentQueue<IJob> Jobs;
         public static List<SyncJobConfiguration>? SyncJobConfigurations { get; private set; }
         private static ConcurrentQueue<JobInstruction>? JobInstructions;
         private static List<FileSystemWatcher>? FileSystemWatchers;
         private static Timer? ScanDirectoriesTimer;
-        public static Config Configurations { get; set; }
+        private static List<char> LocicalDrives;
+        public static Config? Configurations { get; set; }
+
+        // Test
+
+        //public void test()
+        //{
+            
+        //    CopyFileJob CopyFile = new CopyFileJob();
+        //    CopyFile.SourcePath = "C:\\1";
+        //    CopyFile.TargetPath = "C:\\2";
+        //    CopyFile.FullPath = "C:\\1\\test.txt";
+        //    Jobs.Enqueue(CopyFile);
+        //}
+
+        //public void DoTest()
+        //{
+        //    Jobs.TryDequeue(out IJob test);
+        //    test.DoJob();
+        //}
 
         // SyncJob Configurations
 
-        public static void Init()
+        public void Init()
         {
             SyncJobConfigurations = new List<SyncJobConfiguration>();
             JobInstructions = new ConcurrentQueue<JobInstruction>();
             FileSystemWatchers = new List<FileSystemWatcher>();
             Configurations = new Config();
+            Jobs = new Dictionary<string, ConcurrentQueue<IJob>>();
+            LocicalDrives = new List<char>();
+
+            Jobs.Add("NoParallelSync", new ConcurrentQueue<IJob>());
+        }
+        public void GetLogicalDrives(List<SyncJobConfiguration> SyncConfigs)
+        {
+            List<char> DriveLetters = new List<char>();
+            SyncConfigs.FindAll(entry => Char.IsLetter(entry.SourceDiretory[0])).ToList().ForEach(entry => DriveLetters.Add(entry.SourceDiretory[0]));
+            SyncConfigs.ForEach(entry => entry.TargetDirectories.FindAll(entry => Char.IsLetter(entry[0])).ToList().ForEach(entry => DriveLetters.Add(entry[0])));
+            LocicalDrives = DriveLetters.Distinct().ToList();
+        }
+        public void RegenerateLogicalDriveQueues() {
+            List<string> Paths = new List<string>();
+            SyncJobConfigurations.Select(entry => entry.SourceDiretory).ToList().ForEach(entry => Paths.Add(entry));
+            SyncJobConfigurations.ForEach(entry => entry.TargetDirectories.ForEach(entry => Paths.Add(entry)));
+            List<string> UniqueDriveLetters = Paths.Select(entry => entry[0].ToString()).ToList().Distinct().ToList();
+            List<string> DriveLettersWhichAreNotInQueues = UniqueDriveLetters.Where(entry => !Jobs.ToList().Any(entry2 => entry2.Key == entry)).ToList();
+            DriveLettersWhichAreNotInQueues.ForEach(entry => Jobs.Add(entry, new ConcurrentQueue<IJob>()));
         }
         public static void SynchronizeDirectories()
         {

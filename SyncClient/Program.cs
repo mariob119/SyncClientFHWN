@@ -8,12 +8,17 @@ namespace SyncClient
     {
         static void Main(string[] args)
         {
-            LoggingConsole.Run();
+            SyncJobs Jobs = new SyncJobs();
 
-            SyncJobs.Init();
+            LoggingConsole.Run();
+            Jobs.Init();
             SyncJobs.LoadConfigurations();
-            SyncJobs.HealthCheck();
-            SyncJobs.SynchronizeDirectories();
+            Jobs.GetLogicalDrives(SyncJobs.SyncJobConfigurations);
+            Jobs.RegenerateLogicalDriveQueues();
+            Jobs.RegenerateLogicalDriveQueues();
+
+            //SyncJobs.HealthCheck();
+            //SyncJobs.SynchronizeDirectories();
 
             MainMenu.Run();
 

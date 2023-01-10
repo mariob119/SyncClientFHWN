@@ -1,1 +1,1 @@
-[{"SourceDiretory":"C:\\1","TargetDirectories":["C:\\2"],"IncludeSubdiretories":true,"ExcludedDiretories":[]},{"SourceDiretory":"C:\\1","TargetDirectories":["C:\\3"],"IncludeSubdiretories":false,"ExcludedDiretories":[]}]
+[{"SourceDiretory":"C:\\1","TargetDirectories":["C:\\2"],"IncludeSubdiretories":true,"ExcludedDiretories":[]},{"SourceDiretory":"C:\\1","TargetDirectories":["C:\\3"],"IncludeSubdiretories":false,"ExcludedDiretories":[]},{"SourceDiretory":"C:\\1","TargetDirectories":["D:\\1"],"IncludeSubdiretories":true,"ExcludedDiretories":[]}]
