@@ -15,11 +15,11 @@ namespace SyncClient
 {
     static class SyncJobs
     {
-        public static List<SyncJobConfiguration>? SyncJobConfigurations { get; set; }
+        public static List<SyncJobConfiguration>? SyncJobConfigurations { get; private set; }
         private static ConcurrentQueue<JobInstruction>? JobInstructions;
         private static List<FileSystemWatcher>? FileSystemWatchers;
         private static Timer? ScanDirectoriesTimer;
-        private static Configs Configurations;
+        public static Config Configurations { get; set; }
 
         // SyncJob Configurations
 
@@ -28,8 +28,8 @@ namespace SyncClient
             SyncJobConfigurations = new List<SyncJobConfiguration>();
             JobInstructions = new ConcurrentQueue<JobInstruction>();
             FileSystemWatchers = new List<FileSystemWatcher>();
-            Configurations = new Configs();
-            ScanDirectoriesTimer = new Timer(new TimerCallback(ScanDirectories), null, 2000, 1000);
+            Configurations = new Config();
+            ScanDirectoriesTimer = new Timer(new TimerCallback(ScanDirectories), null, 0, 1000);
         }
         public static void AddConfiguration(SyncJobConfiguration syncJobConfiguration)
         {
@@ -183,6 +183,10 @@ namespace SyncClient
             HealthCheck();
             StartSyncJobs();
         }
+        public static bool CheckIfJobsAreRunning()
+        {
+            return Monitor.TryEnter(_sync_locker);
+        }
 
         // Configuration Operations
 
@@ -196,7 +200,7 @@ namespace SyncClient
             if (File.Exists("configs.json"))
             {
                 string JsonConfigurations = File.ReadAllText("configs.json");
-                Configurations = JsonSerializer.Deserialize<Configs>(JsonConfigurations)!;
+                Configurations = JsonSerializer.Deserialize<Config>(JsonConfigurations)!;
             }
         }
         public static void SaveConfigurations()
@@ -252,11 +256,11 @@ namespace SyncClient
                 try
                 {
                     File.Copy(SourceFilePath, TargetFilePath, true);
-                    Logger.log($"Copied {SourceFilePath} to {TargetFilePath}");
+                    Logger.Log(CopyFileLogMessage(SourceFilePath, TargetFilePath));
                 }
                 catch
                 {
-                    Logger.log($"File {SourceFilePath} is being used by another Process!");
+                    Logger.Log($"File {SourceFilePath} is being used by another Process!");
                 }
             }
         }
@@ -269,11 +273,11 @@ namespace SyncClient
                 try
                 {
                     File.Delete(FullFilePath);
-                    Logger.log($"Deleted {FullFilePath}");
+                    Logger.Log(DeleteFileLogMessage(FullFilePath));
                 }
                 catch
                 {
-                    Logger.log($"File {FullFilePath} is being used by another Process!");
+                    Logger.Log($"File {FullFilePath} is being used by another Process!");
                 }
             }
         }
@@ -284,6 +288,7 @@ namespace SyncClient
             {
                 string DirectoryName = SourceDirectory.Replace(SyncJobSourceDirectory, "");
                 Directory.CreateDirectory(TargetDirectory + DirectoryName);
+                Logger.Log(CreateDirectoryLogMessage(TargetDirectory + DirectoryName));
             }
         }
         readonly static object _lock_delete_directory = new object();
@@ -294,6 +299,7 @@ namespace SyncClient
                 if (Directory.Exists(DirectoryPath))
                 {
                     Directory.Delete(DirectoryPath, true);
+                    Logger.Log(DeleteDirectoryLogMessage(DirectoryPath));
                 }
             }
         }
@@ -329,6 +335,40 @@ namespace SyncClient
             {
                 JobInstructions.Enqueue(jobInstruction);
             }
+        }
+
+        // Log Messages
+
+        private static string LogMessageFormated(string Message)
+        {
+            string MessageFormated = DateTime.Now.ToString("HH:mm:ss ON dd.MM.yyyy") + "\n";
+            MessageFormated += Message;
+            MessageFormated += "===============================================================";
+            return MessageFormated;
+        }
+        private static string CopyFileLogMessage(string SourceFileName, string TargetFileName)
+        {
+            string Message = $"Copied:\t\t{SourceFileName}\n";
+            Message += $"To:\t\t{TargetFileName}\n";
+            return LogMessageFormated(Message);
+        }
+
+        private static string DeleteFileLogMessage(string TargetFileName)
+        {
+            string Message = $"Deleted:\t{TargetFileName}\n";
+            return LogMessageFormated(Message);
+        }
+
+        private static string CreateDirectoryLogMessage(string TargetDirectoryPath)
+        {
+            string Message = $"Created:\t{TargetDirectoryPath}\n";
+            return LogMessageFormated(Message);
+        }
+        private static string DeleteDirectoryLogMessage(string TargetDirectoryPath)
+        {
+            string Message = $"Deleted:\t{TargetDirectoryPath}\n";
+            return LogMessageFormated(Message);
+
         }
 
         // File System Watchers
@@ -425,8 +465,14 @@ namespace SyncClient
                                 string SourceDirectoryName = SourceDirectory.Replace(syncJobConfiguration.SourceDiretory, "");
                                 string SubTargetDirectory = TargetDirectory + SourceDirectoryName;
 
-                                Directory.CreateDirectory(SubTargetDirectory);
-                                
+                                if (!Directory.Exists(SubTargetDirectory))
+                                {
+                                    CreateCopyDirectoryQueue(syncJobConfiguration.SourceDiretory, TargetDirectory, SourceDirectory);
+                                    StartJobWorker();
+                                }
+
+                                while (!Directory.Exists(SubTargetDirectory)) { }
+
                                 MirrorDirectoryContentFromSourceToTarget(SourceDirectory, SubTargetDirectory, false);
                             }
                         }
@@ -566,14 +612,14 @@ namespace SyncClient
         }
         public static IEnumerable<FileInfo> GetFilesOfDirectory(DirectoryInfo Dir, bool IncludeSubDiretories)
         {
-                if (IncludeSubDiretories)
-                {
-                    return Dir.GetFiles("*.*", SearchOption.AllDirectories);
-                }
-                else
-                {
-                    return Dir.GetFiles("*.*", SearchOption.TopDirectoryOnly);
-                }
+            if (IncludeSubDiretories)
+            {
+                return Dir.GetFiles("*.*", SearchOption.AllDirectories);
+            }
+            else
+            {
+                return Dir.GetFiles("*.*", SearchOption.TopDirectoryOnly);
+            }
         }
         public static void SetAttributes(string SourcePath, string TargetPath)
         {

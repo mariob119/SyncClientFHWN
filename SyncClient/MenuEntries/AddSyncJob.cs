@@ -10,7 +10,7 @@ namespace SyncClient.MenuEntries
     {
         private static string Name = "Add Synchonronisation Folder";
         private static string Info = "Adds a root directory which should be synchronised!";
-        private static string Command = "add";
+        private static string Command = "addjob";
         public static MenuEntryInfo GetMenuEntryInfo()
         {
             return new MenuEntryInfo(Name, Info, Command);

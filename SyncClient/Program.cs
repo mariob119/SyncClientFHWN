@@ -12,8 +12,6 @@ namespace SyncClient
             SyncJobs.LoadConfigurations();
             SyncJobs.HealthCheck();
 
-            //SyncJobs.MirrorAllDirectoriesOfSyncJobs(SyncJobs.SyncJobConfigurations);
-
             LoggingConsole.Run();
             MainMenu.Run();
 

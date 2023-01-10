@@ -1,1 +1,1 @@
-[{"SourceDiretory":"C:\\1","TargetDirectories":["C:\\2"],"IncludeSubdiretories":true,"ExcludedDiretories":["C:\\1\\test"]},{"SourceDiretory":"C:\\1","TargetDirectories":["C:\\3"],"IncludeSubdiretories":true,"ExcludedDiretories":[]}]
+[{"SourceDiretory":"C:\\1","TargetDirectories":["C:\\2"],"IncludeSubdiretories":true,"ExcludedDiretories":[]},{"SourceDiretory":"C:\\1","TargetDirectories":["C:\\3"],"IncludeSubdiretories":false,"ExcludedDiretories":[]}]

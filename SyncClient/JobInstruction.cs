@@ -8,12 +8,12 @@ namespace SyncClient
 {
     internal class JobInstruction
     {
-        public string Instruction { get; }
-        public string SourceDirectory { get; }
-        public string TargetDirectory { get; }
-        public string FileName { get; }
-        public string SyncJobSourceDirectory { get; }
-        public bool IsDirectory { get; }
+        public string Instruction { get; private set; }
+        public string SourceDirectory { get; private set; }
+        public string TargetDirectory { get; private set; }
+        public string FileName { get; private set; }
+        public string SyncJobSourceDirectory { get; private set; }
+        public bool IsDirectory { get; private set; }
         public JobInstruction(string TargetDirectory, string FileName)
         {
             this.Instruction = "DELETEFILE";

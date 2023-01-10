@@ -16,11 +16,11 @@ namespace SyncClient
             MenuEntries.Add(AddSyncJob.GetMenuEntryInfo());
             MenuEntries.Add(SyncJobDetails.GetMenuEntryInfo());
             MenuEntries.Add(DeleteSyncJob.GetMenuEntryInfo());
+            MenuEntries.Add(Exit.GetMenuEntryInfo());
+            MenuEntries.Add(Help.GetMenuEntryInfo());
 
             List<String> Commands = new List<String>();
-            Commands.Add("help");
-            Commands.Add("exit");
-            foreach(MenuEntryInfo info in MenuEntries)
+            foreach (MenuEntryInfo info in MenuEntries)
             {
                 Commands.Add(info.Command);
             }
@@ -45,17 +45,18 @@ namespace SyncClient
                 {
                     ShowSyncJobs.MainMethode();
                 }
-                if(Command == "help")
+                if (Command == Help.GetCommand())
                 {
-                    PrintHelp(MenuEntries);
+                    Help.MainMethode(MenuEntries);
                 }
-                if(Command == "exit")
+                if (Command == Exit.GetCommand())
                 {
-                    Running = false;
+                    Running = Exit.MainMethode();
                 }
             }
         }
-        private static string EnterACommand(List<String> Commands) {
+        private static string EnterACommand(List<String> Commands)
+        {
             Functions.WriteHeadLine("Main Menu");
             Console.WriteLine("Enter a command or 'help':");
             string Command = Console.ReadLine();
@@ -68,23 +69,6 @@ namespace SyncClient
                 Console.Clear();
             }
             return Command;
-        }
-        private static void PrintHelp(List<MenuEntryInfo> menuEntryInfos)
-        {
-            Functions.WriteHeadLine("HELP-PAGE");
-
-            foreach(MenuEntryInfo menuEntry in menuEntryInfos)
-            {
-                Console.WriteLine($"Name: \t\t{menuEntry.Name}");
-                Console.WriteLine($"Command: \t'{menuEntry.Command}'");
-                Console.WriteLine($"Description: \t{menuEntry.Info}\n");
-            }
-
-            Console.WriteLine($"Name: \t\tExit the program");
-            Console.WriteLine($"Command: \t'exit'");
-            Console.WriteLine($"Description: \tExiting the program!\n");
-
-            Functions.PressAnyKeyToContinue();
         }
     }
 }

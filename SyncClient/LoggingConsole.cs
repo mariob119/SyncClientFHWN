@@ -10,25 +10,23 @@ namespace SyncClient
 {
     public static class LoggingConsole
     {
-        private static Process p = new Process();
+        private static Process LoggingConsoleWindow = new Process();
         public static void Run()
         {
-            string now = Directory.GetCurrentDirectory();
-            string new1 = now.Replace("SyncClient\\bin\\Debug\\net6.0", "");
+            string CurrentDirectory = Directory.GetCurrentDirectory();
+            string GetCommonSourceDirectory = CurrentDirectory.Replace("SyncClient\\bin\\Debug\\net6.0", "");
 
-            string ProcessPath = new1 + "Logging\\bin\\Debug\\net6.0\\Logging.exe";
+            string ProcessPath = GetCommonSourceDirectory + "Logging\\bin\\Debug\\net6.0\\Logging.exe";
 
-            // Redirect the output stream of the child process.
-            p.StartInfo.UseShellExecute = true;
-            p.StartInfo.RedirectStandardOutput = false;
-            //p.StartInfo.FileName = "C:\\Users\\mario\\source\\repos\\SyncClientFHWN\\Logging\\bin\\Debug\\net6.0\\Logging.exe";
-            p.StartInfo.FileName = ProcessPath;
-            p.Start();
+            LoggingConsoleWindow.StartInfo.UseShellExecute = true;
+            LoggingConsoleWindow.StartInfo.RedirectStandardOutput = false;
+            LoggingConsoleWindow.StartInfo.FileName = ProcessPath;
+            LoggingConsoleWindow.Start();
         }
 
         public static void Stop()
         {
-            p.Kill();
+            LoggingConsoleWindow.Kill();
         }
     }
 }

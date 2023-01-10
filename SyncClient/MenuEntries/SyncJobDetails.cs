@@ -10,7 +10,7 @@ namespace SyncClient.MenuEntries
     {
         private static string Name = "Show sync details for choosen directory";
         private static string Info = "With this command, all the details of one sync folder is shown";
-        private static string Command = "syncjobdetails";
+        private static string Command = "jobdetails";
         public static MenuEntryInfo GetMenuEntryInfo()
         {
             return new MenuEntryInfo(Name, Info, Command);

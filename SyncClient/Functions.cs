@@ -105,5 +105,15 @@ namespace SyncClient
             }
             if(Input == "true") { return true; } else { return false; }
         }
+        public static bool EnterYesOrNo()
+        {
+            string Input = EnterNotEmptyString();
+            while (!(Input == "y" || Input == "n"))
+            {
+                Console.WriteLine("Enter 'y' (yes) or 'n' (no)!");
+                Input = EnterNotEmptyString();
+            }
+            if (Input == "y") { return true; } else { return false; }
+        }
     }
 }

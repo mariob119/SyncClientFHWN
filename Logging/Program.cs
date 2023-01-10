@@ -9,7 +9,7 @@ namespace Logging
         {
             while (true)
             {
-                using (NamedPipeClientStream namedPipeClient = new NamedPipeClientStream("test-pipe"))
+                using (NamedPipeClientStream namedPipeClient = new NamedPipeClientStream("LoggingPipe"))
                 {
                     byte[] buffer = new byte[1024];
                     namedPipeClient.Connect();
