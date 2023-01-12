@@ -1,4 +1,5 @@
-﻿using SyncClient.JobTypes;
+﻿using SyncClient.ConfigModels;
+using SyncClient.JobTypes;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,83 +15,44 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace SyncClient
 {
-    class SyncJobs
+    class SyncTasks
     {
-        public Dictionary<string, ConcurrentQueue<IJob>>? Jobs;
-        //public ConcurrentQueue<IJob> Jobs;
-        public static List<SyncJobConfiguration>? SyncJobConfigurations { get; private set; }
+        public static List<SyncTask>? Tasks { get; private set; }
+
         private static ConcurrentQueue<JobInstruction>? JobInstructions;
         private static List<FileSystemWatcher>? FileSystemWatchers;
         private static Timer? ScanDirectoriesTimer;
-        private static List<char> LocicalDrives;
-        public static Config? Configurations { get; set; }
+        public static ClientConfig? Configurations { get; set; }
 
-        // Test
 
-        //public void test()
-        //{
-            
-        //    CopyFileJob CopyFile = new CopyFileJob();
-        //    CopyFile.SourcePath = "C:\\1";
-        //    CopyFile.TargetPath = "C:\\2";
-        //    CopyFile.FullPath = "C:\\1\\test.txt";
-        //    Jobs.Enqueue(CopyFile);
-        //}
-
-        //public void DoTest()
-        //{
-        //    Jobs.TryDequeue(out IJob test);
-        //    test.DoJob();
-        //}
-
-        // SyncJob Configurations
-
-        public void Init()
+        public static void Init()
         {
-            SyncJobConfigurations = new List<SyncJobConfiguration>();
+            Tasks = new List<SyncTask>();
             JobInstructions = new ConcurrentQueue<JobInstruction>();
             FileSystemWatchers = new List<FileSystemWatcher>();
-            Configurations = new Config();
-            Jobs = new Dictionary<string, ConcurrentQueue<IJob>>();
-            LocicalDrives = new List<char>();
+            Configurations = new ClientConfig();
+        }
 
-            Jobs.Add("NoParallelSync", new ConcurrentQueue<IJob>());
-        }
-        public void GetLogicalDrives(List<SyncJobConfiguration> SyncConfigs)
-        {
-            List<char> DriveLetters = new List<char>();
-            SyncConfigs.FindAll(entry => Char.IsLetter(entry.SourceDiretory[0])).ToList().ForEach(entry => DriveLetters.Add(entry.SourceDiretory[0]));
-            SyncConfigs.ForEach(entry => entry.TargetDirectories.FindAll(entry => Char.IsLetter(entry[0])).ToList().ForEach(entry => DriveLetters.Add(entry[0])));
-            LocicalDrives = DriveLetters.Distinct().ToList();
-        }
-        public void RegenerateLogicalDriveQueues() {
-            List<string> Paths = new List<string>();
-            SyncJobConfigurations.Select(entry => entry.SourceDiretory).ToList().ForEach(entry => Paths.Add(entry));
-            SyncJobConfigurations.ForEach(entry => entry.TargetDirectories.ForEach(entry => Paths.Add(entry)));
-            List<string> UniqueDriveLetters = Paths.Select(entry => entry[0].ToString()).ToList().Distinct().ToList();
-            List<string> DriveLettersWhichAreNotInQueues = UniqueDriveLetters.Where(entry => !Jobs.ToList().Any(entry2 => entry2.Key == entry)).ToList();
-            DriveLettersWhichAreNotInQueues.ForEach(entry => Jobs.Add(entry, new ConcurrentQueue<IJob>()));
-        }
         public static void SynchronizeDirectories()
         {
             Thread InitSync = new Thread(ScanDirectories);
             InitSync.Start();
             StartJobWorker();
         }
-        public static void AddConfiguration(SyncJobConfiguration syncJobConfiguration)
+        public static void AddConfiguration(SyncTask syncJobConfiguration)
         {
-            SyncJobConfigurations.Add(syncJobConfiguration);
+            Tasks.Add(syncJobConfiguration);
         }
 
         // SyncJob Informations
 
         public static void ShowSyncDiretories()
         {
-            if (SyncJobConfigurations.Count > 0)
+            if (Tasks.Count > 0)
             {
-                foreach (SyncJobConfiguration syncJobConfiguration in SyncJobConfigurations)
+                foreach (SyncTask syncJobConfiguration in Tasks)
                 {
-                    int SyncJobNumber = SyncJobConfigurations.IndexOf(syncJobConfiguration) + 1;
+                    int SyncJobNumber = Tasks.IndexOf(syncJobConfiguration) + 1;
                     Console.WriteLine($"Sync Job Number {SyncJobNumber} || Root Directory:\t{syncJobConfiguration.GetSourceDirectory()}");
                 }
             }
@@ -98,29 +60,29 @@ namespace SyncClient
         }
         public static int GetAmountOfSyncJobs()
         {
-            return SyncJobConfigurations.Count;
+            return Tasks.Count;
         }
         public static void ShowDirectoryDetails(int FolderIndex)
         {
-            if (FolderIndex >= 0 && FolderIndex < SyncJobConfigurations.Count)
+            if (FolderIndex >= 0 && FolderIndex < Tasks.Count)
             {
-                Console.WriteLine($"Root Directory: {SyncJobConfigurations[FolderIndex].GetSourceDirectory()}\n");
+                Console.WriteLine($"Root Directory: {Tasks[FolderIndex].GetSourceDirectory()}\n");
 
                 Console.WriteLine("Target Folders:");
                 int i = 1;
-                foreach (String TargetFolder in SyncJobConfigurations[FolderIndex].TargetDirectories)
+                foreach (String TargetFolder in Tasks[FolderIndex].TargetDirectories)
                 {
                     Console.WriteLine($"{i})\t{TargetFolder}");
                     i++;
                 }
 
-                Console.WriteLine($"\nSync just root directory: {SyncJobConfigurations[FolderIndex].GetSyncJustRootDirectoryAttribute()}");
+                Console.WriteLine($"\nSync just root directory: {Tasks[FolderIndex].GetSyncJustRootDirectoryAttribute()}");
 
-                if (SyncJobConfigurations[FolderIndex].ExcludedDiretories.Count > 0)
+                if (Tasks[FolderIndex].ExcludedDiretories.Count > 0)
                 {
                     Console.WriteLine("\nExcluded Folders:");
                     i = 1;
-                    foreach (String ExcludedFolder in SyncJobConfigurations[FolderIndex].ExcludedDiretories)
+                    foreach (String ExcludedFolder in Tasks[FolderIndex].ExcludedDiretories)
                     {
                         Console.WriteLine($"{i})\t{ExcludedFolder}");
                         i++;
@@ -175,7 +137,7 @@ namespace SyncClient
         }
         public static void ScanDirectories(object state)
         {
-            MirrorAllDirectoriesOfSyncJobs(SyncJobConfigurations);
+            MirrorAllDirectoriesOfSyncJobs(Tasks);
         }
         public static void StartJobWorker()
         {
@@ -183,7 +145,7 @@ namespace SyncClient
         }
         public static void StartSyncJobs()
         {
-            foreach (SyncJobConfiguration syncJobConfiguration in SyncJobConfigurations)
+            foreach (SyncTask syncJobConfiguration in Tasks)
             {
                 FileSystemWatchers.Add(MyWatcherFactory(syncJobConfiguration));
             }
@@ -206,12 +168,12 @@ namespace SyncClient
             if (File.Exists("syncjobs.json"))
             {
                 string JsonSettings = File.ReadAllText("syncjobs.json");
-                SyncJobConfigurations = JsonSerializer.Deserialize<List<SyncJobConfiguration>>(JsonSettings)!;
+                Tasks = JsonSerializer.Deserialize<List<SyncTask>>(JsonSettings)!;
             }
             if (File.Exists("configs.json"))
             {
                 string JsonConfigurations = File.ReadAllText("configs.json");
-                Configurations = JsonSerializer.Deserialize<Config>(JsonConfigurations)!;
+                Configurations = JsonSerializer.Deserialize<ClientConfig>(JsonConfigurations)!;
             }
             if (!Directory.Exists(Configurations.LogFilePath))
             {
@@ -228,7 +190,7 @@ namespace SyncClient
         }
         public static void SaveConfigurations()
         {
-            string JsonSettings = JsonSerializer.Serialize(SyncJobConfigurations);
+            string JsonSettings = JsonSerializer.Serialize(Tasks);
             File.WriteAllText("syncjobs.json", JsonSettings);
 
             if (!Configurations.LogToDifferentPath)
@@ -241,9 +203,9 @@ namespace SyncClient
         }
         public static void HealthCheck()
         {
-            List<SyncJobConfiguration> RemoveSyncJob = new List<SyncJobConfiguration>();
+            List<SyncTask> RemoveSyncJob = new List<SyncTask>();
             List<string> RemoveTargetDirectories = new List<string>();
-            foreach (SyncJobConfiguration Config in SyncJobConfigurations)
+            foreach (SyncTask Config in Tasks)
             {
                 if (!Directory.Exists(Config.GetSourceDirectory()))
                 {
@@ -265,11 +227,11 @@ namespace SyncClient
                     RemoveSyncJob.Add(Config);
                 }
             }
-            foreach (SyncJobConfiguration Config in RemoveSyncJob)
+            foreach (SyncTask Config in RemoveSyncJob)
             {
-                SyncJobConfigurations.Remove(Config);
+                Tasks.Remove(Config);
             }
-            SyncJobs.SaveConfigurations();
+            SyncTasks.SaveConfigurations();
         }
 
         // File and Folder Operations
@@ -402,7 +364,7 @@ namespace SyncClient
 
         // File System Watchers
 
-        public static FileSystemWatcher MyWatcherFactory(SyncJobConfiguration syncJobConfiguration)
+        public static FileSystemWatcher MyWatcherFactory(SyncTask syncJobConfiguration)
         {
             FileSystemWatcher watcher = new FileSystemWatcher(syncJobConfiguration.SourceDiretory);
             watcher.NotifyFilter = NotifyFilters.Attributes
@@ -423,7 +385,7 @@ namespace SyncClient
         }
         public static void OnSourceChange(object sender, FileSystemEventArgs e)
         {
-            foreach (SyncJobConfiguration syncJobConfiguration in SyncJobConfigurations)
+            foreach (SyncTask syncJobConfiguration in Tasks)
             {
                 //if (syncJobConfiguration.RootFolder == Path.GetDirectoryName(e.FullPath))
                 if (Path.GetDirectoryName(e.FullPath).Contains(syncJobConfiguration.SourceDiretory))
@@ -452,7 +414,7 @@ namespace SyncClient
         }
         public static void OnSourceDeleted(object sender, FileSystemEventArgs e)
         {
-            foreach (SyncJobConfiguration syncJobConfiguration in SyncJobConfigurations)
+            foreach (SyncTask syncJobConfiguration in Tasks)
             {
                 if (Path.GetDirectoryName(e.FullPath).Contains(syncJobConfiguration.SourceDiretory))
                 {
@@ -472,11 +434,11 @@ namespace SyncClient
             ThreadPool.QueueUserWorkItem(SyncData);
         }
 
-        // Mirror all Directories of SyncJobs with Configurations
+        // Mirror all Directories of SyncTasks with Configurations
 
-        public static void MirrorAllDirectoriesOfSyncJobs(List<SyncJobConfiguration> syncJobConfigurations)
+        public static void MirrorAllDirectoriesOfSyncJobs(List<SyncTask> syncJobConfigurations)
         {
-            foreach (SyncJobConfiguration syncJobConfiguration in syncJobConfigurations)
+            foreach (SyncTask syncJobConfiguration in syncJobConfigurations)
             {
                 foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
                 {

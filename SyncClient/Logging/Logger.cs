@@ -20,7 +20,7 @@ namespace SyncClient
                     byte[] bytes = Encoding.ASCII.GetBytes(Message);
                     namedPipeServer.Write(bytes);
                 }
-                if (SyncJobs.Configurations.WriteToLogFile)
+                if (SyncTasks.Configurations.WriteToLogFile)
                 {
                     if (!File.Exists("log.txt"))
                     {
@@ -28,7 +28,7 @@ namespace SyncClient
                     }
                     double SizeInBytes = new FileInfo("log.txt").Length;
                     double FileSizeInMB = SizeInBytes / 1000000;
-                    if (FileSizeInMB > SyncJobs.Configurations.LogFileSize)
+                    if (FileSizeInMB > SyncTasks.Configurations.LogFileSize)
                     {
                         if (File.Exists("log.txt.bak"))
                         {

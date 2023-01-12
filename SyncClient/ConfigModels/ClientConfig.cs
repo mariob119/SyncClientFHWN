@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SyncClient
+namespace SyncClient.ConfigModels
 {
-    internal class Config
+    internal class ClientConfig
     {
         public bool WriteToLogFile { get; set; }
         public double LogFileSize { get; set; }
@@ -15,15 +15,15 @@ namespace SyncClient
         public bool LogToDifferentPath { get; set; }
         public int ScanDiretoriesIntervalInMillis { get; set; }
         public bool ScanDirectoriesRepeatly { get; set; }
-        public Config()
+        public ClientConfig()
         {
-            this.WriteToLogFile = true;
-            this.LogFileSize = 10;
-            this.LogFileName = "log";
-            this.LogFilePath = "ApplicationDiretory";
-            this.LogToDifferentPath = false;
-            this.ScanDiretoriesIntervalInMillis = 500;
-            this.ScanDirectoriesRepeatly = false;
+            WriteToLogFile = true;
+            LogFileSize = 10;
+            LogFileName = "log";
+            LogFilePath = "ApplicationDiretory";
+            LogToDifferentPath = false;
+            ScanDiretoriesIntervalInMillis = 500;
+            ScanDirectoriesRepeatly = false;
         }
     }
 }

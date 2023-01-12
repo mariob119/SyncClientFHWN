@@ -8,21 +8,19 @@ namespace SyncClient
     {
         static void Main(string[] args)
         {
-            SyncJobs Jobs = new SyncJobs();
+            SyncTasks Jobs = new SyncTasks();
 
             LoggingConsole.Run();
-            Jobs.Init();
-            SyncJobs.LoadConfigurations();
-            Jobs.GetLogicalDrives(SyncJobs.SyncJobConfigurations);
-            Jobs.RegenerateLogicalDriveQueues();
-            Jobs.RegenerateLogicalDriveQueues();
 
-            //SyncJobs.HealthCheck();
-            //SyncJobs.SynchronizeDirectories();
+            SyncTasks.LoadConfigurations();
+
+
+            //SyncTasks.HealthCheck();
+            //SyncTasks.SynchronizeDirectories();
 
             MainMenu.Run();
 
-            SyncJobs.SaveConfigurations();
+            SyncTasks.SaveConfigurations();
             LoggingConsole.Stop();
         }
     }

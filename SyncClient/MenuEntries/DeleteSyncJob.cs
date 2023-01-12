@@ -23,7 +23,7 @@ namespace SyncClient.MenuEntries
         {
             Functions.WriteHeadLine("Delete a sync job");
 
-            switch (SyncJobs.GetAmountOfSyncJobs())
+            switch (SyncTasks.GetAmountOfSyncJobs())
             {
                 case 1:
                     {
@@ -44,15 +44,15 @@ namespace SyncClient.MenuEntries
         }
         private static void ShowOneSyncJob()
         {
-            SyncJobs.ShowSyncDiretories();
+            SyncTasks.ShowSyncDiretories();
             Console.WriteLine("\nThere is exactly one job configured! Type 'y' if you want to delete it!");
             string Input = Functions.EnterNotEmptyString();
             if(Input == "y")
             {
-                SyncJobs.SyncJobConfigurations.RemoveAt(0);
+                SyncTasks.Tasks.RemoveAt(0);
                 Console.WriteLine("\nSync job has been removed successfully!");
-                SyncJobs.SaveConfigurations();
-                SyncJobs.RefreshSyncJobs();
+                SyncTasks.SaveConfigurations();
+                SyncTasks.RefreshSyncJobs();
             } 
             else
             {
@@ -62,17 +62,17 @@ namespace SyncClient.MenuEntries
         }
         private static void ShowAllSyncJobs()
         {
-            SyncJobs.ShowSyncDiretories();
+            SyncTasks.ShowSyncDiretories();
             Console.Write("\nEnter a sync job which you want to delete: ");
-            int SyncJobNumber = Functions.GetNumberBetween(0, SyncJobs.GetAmountOfSyncJobs() + 1) - 1;
+            int SyncJobNumber = Functions.GetNumberBetween(0, SyncTasks.GetAmountOfSyncJobs() + 1) - 1;
             Console.WriteLine($"Do you want to delte the job with number {SyncJobNumber + 1} ('y' to delete)?");
             string Input = Functions.EnterNotEmptyString();
             if (Input == "y")
             {
-                SyncJobs.SyncJobConfigurations.RemoveAt(SyncJobNumber);
+                SyncTasks.Tasks.RemoveAt(SyncJobNumber);
                 Console.WriteLine("\nSync job has been removed successfully!");
-                SyncJobs.SaveConfigurations();
-                SyncJobs.RefreshSyncJobs();
+                SyncTasks.SaveConfigurations();
+                SyncTasks.RefreshSyncJobs();
             }
             else
             {

@@ -23,7 +23,7 @@ namespace SyncClient.MenuEntries
         {
             bool Quit = true;
             bool Running = true;
-            if (!SyncJobs.CheckIfJobsAreRunning())
+            if (!SyncTasks.CheckIfJobsAreRunning())
             {
                 Console.WriteLine("There are still some jobs running! Do you want to quit?\n");
                 Console.WriteLine("Enter 'y' (yes) or 'n' (no)!\n");

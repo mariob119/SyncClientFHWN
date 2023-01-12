@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SyncClient.ConfigModels;
 
 namespace SyncClient.MenuEntries
 {
@@ -23,14 +24,14 @@ namespace SyncClient.MenuEntries
         {
             Functions.WriteHeadLine("Add a sync job");
 
-            SyncJobConfiguration config = new SyncJobConfiguration();
+            SyncTask config = new SyncTask();
 
             Console.WriteLine("Enter a root direcotry:");
             string RootDirectory = Functions.EnterAValidDirectory();
             config.SetSourceDirectory(RootDirectory);
 
             List<string> TargetDirectories = new List<string>();
-            foreach (SyncJobConfiguration syncJobConfiguration in SyncJobs.SyncJobConfigurations)
+            foreach (SyncTask syncJobConfiguration in SyncTasks.Tasks)
             {
                 foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
                 {
@@ -73,11 +74,11 @@ namespace SyncClient.MenuEntries
                 config.AddExcludedDirectory(Functions.EnterADirectoryWithPrefix(config.GetSourceDirectory()));
             }
 
-            SyncJobs.AddConfiguration(config);
-            SyncJobs.SaveConfigurations();
-            SyncJobs.RefreshSyncJobs();
-            Console.WriteLine($"\nSync Job Number {SyncJobs.SyncJobConfigurations.Count()} has been added successfully!");
-            SyncJobs.HealthCheck();
+            SyncTasks.AddConfiguration(config);
+            SyncTasks.SaveConfigurations();
+            SyncTasks.RefreshSyncJobs();
+            Console.WriteLine($"\nSync Job Number {SyncTasks.Tasks.Count()} has been added successfully!");
+            SyncTasks.HealthCheck();
             Functions.PressAnyKeyToContinue();
         }
     }

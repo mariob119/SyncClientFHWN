@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SyncClient
+namespace SyncClient.ConfigModels
 {
-    internal class SyncJobConfiguration
+    internal class SyncTask
     {
         public string SourceDiretory { get; set; }
         public List<string> TargetDirectories { get; set; }
         public bool IncludeSubdiretories { set; get; }
         public List<string> ExcludedDiretories { set; get; }
-        public SyncJobConfiguration()
+        public SyncTask()
         {
             TargetDirectories = new List<string>();
             IncludeSubdiretories = false;
@@ -21,16 +21,16 @@ namespace SyncClient
 
         public void SetSourceDirectory(string RootFolder)
         {
-            this.SourceDiretory = RootFolder;
+            SourceDiretory = RootFolder;
         }
-        public string GetSourceDirectory() { return this.SourceDiretory; }
+        public string GetSourceDirectory() { return SourceDiretory; }
         public void AddTargetDirectory(string TargetDirectory)
         {
             TargetDirectories.Add(TargetDirectory);
         }
         public void SetIndludeSubdirectoriesAttribute(bool Input)
         {
-            this.IncludeSubdiretories = Input;
+            IncludeSubdiretories = Input;
         }
         public string GetSyncJustRootDirectoryAttribute()
         {
