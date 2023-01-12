@@ -24,7 +24,7 @@ namespace SyncClient
 
         // New
         public static List<SyncTask>? Tasks { get; private set; }
-        public Dictionary<string, ConcurrentQueue<IJob>>? Jobs { get; private set; }
+        public static List<JobQueue> Jobs { get; set; }
         public ConcurrentQueue<string> LogMessages { get; set; }
         private List<char> LocicalDrives;
         public static ClientConfig? Configuration { get; set; }
@@ -38,11 +38,11 @@ namespace SyncClient
             // New
             Tasks = new List<SyncTask>();
             Configuration = new ClientConfig();
-            Jobs = new Dictionary<string, ConcurrentQueue<IJob>>();
+            Jobs = new List<JobQueue>();
             LocicalDrives = new List<char>();
             LogMessages = new ConcurrentQueue<string>();
 
-            Jobs.Add("NoParallelSync", new ConcurrentQueue<IJob>());
+            Jobs.Add(new JobQueue("NoParallelSync"));
         }
 
         // Configurations
@@ -54,6 +54,7 @@ namespace SyncClient
             HealthCheck();
             SaveEverything();
             SynchronizeDirectories();
+            RefreshLogicalDriveQueues();
         }
         public static void SaveEverything()
         {
@@ -135,11 +136,22 @@ namespace SyncClient
             }
             SyncClient.SaveEverything();
         }
-        private void SynchronizeDirectories()
+        private static void SynchronizeDirectories()
         {
             Thread InitSync = new Thread(ScanDirectories);
             InitSync.Start();
             StartJobWorker();
+        }
+        public static void RefreshTaskConfiguration()
+        {
+            HealthCheck();
+            SaveTasks();
+            SynchronizeDirectories();
+            RefreshLogicalDriveQueues();
+        }
+        public static void AddConfiguration(SyncTask syncTask)
+        {
+            Tasks.Add(syncTask);
         }
 
         // SyncJob Informations
@@ -190,39 +202,35 @@ namespace SyncClient
             else { Console.WriteLine("\nFolder with this index does not exist!"); }
         }
 
+        // Queue operations
 
-
-
-
-
-
-
-
-
-
-        public static void AddConfiguration(SyncTask syncJobConfiguration)
+        public static void RefreshLogicalDriveQueues()
         {
-            Tasks.Add(syncJobConfiguration);
+            List<string> Paths = new List<string>();
+            Tasks.Select(entry => entry.SourceDiretory).ToList().ForEach(entry => Paths.Add(entry));
+            Tasks.ForEach(entry => entry.TargetDirectories.ForEach(entry => Paths.Add(entry)));
+            List<string> UniqueDriveLetters = Paths.Select(entry => entry[0].ToString()).ToList().Distinct().ToList();
+            List<string> DriveLettersWhichAreNotInQueues = UniqueDriveLetters.Where(entry => !Jobs.ToList().Any(entry2 => entry2.name == entry)).ToList();
+            DriveLettersWhichAreNotInQueues.ForEach(entry => Jobs.Add(new JobQueue(entry)));
         }
+
+
+
+
+
+
+
+      
 
 
 
         public void GetLogicalDrives()
         {
-            List<SyncTask> SyncConfigs = SyncClient.Tasks;
+            List<SyncTask> SyncConfigs = Tasks;
             List<char> DriveLetters = new List<char>();
             SyncConfigs.FindAll(entry => Char.IsLetter(entry.SourceDiretory[0])).ToList().ForEach(entry => DriveLetters.Add(entry.SourceDiretory[0]));
             SyncConfigs.ForEach(entry => entry.TargetDirectories.FindAll(entry => Char.IsLetter(entry[0])).ToList().ForEach(entry => DriveLetters.Add(entry[0])));
             LocicalDrives = DriveLetters.Distinct().ToList();
-        }
-        public void RegenerateLogicalDriveQueues()
-        {
-            List<string> Paths = new List<string>();
-            SyncClient.Tasks.Select(entry => entry.SourceDiretory).ToList().ForEach(entry => Paths.Add(entry));
-            SyncClient.Tasks.ForEach(entry => entry.TargetDirectories.ForEach(entry => Paths.Add(entry)));
-            List<string> UniqueDriveLetters = Paths.Select(entry => entry[0].ToString()).ToList().Distinct().ToList();
-            List<string> DriveLettersWhichAreNotInQueues = UniqueDriveLetters.Where(entry => !Jobs.ToList().Any(entry2 => entry2.Key == entry)).ToList();
-            DriveLettersWhichAreNotInQueues.ForEach(entry => Jobs.Add(entry, new ConcurrentQueue<IJob>()));
         }
 
 
@@ -449,7 +457,7 @@ namespace SyncClient
         {
             foreach (SyncTask syncJobConfiguration in Tasks)
             {
-                //if (syncJobConfiguration.RootFolder == Path.GetDirectoryName(e.FullPath))
+                //if (syncTask.RootFolder == Path.GetDirectoryName(e.FullPath))
                 if (Path.GetDirectoryName(e.FullPath).Contains(syncJobConfiguration.SourceDiretory))
                 {
                     foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
