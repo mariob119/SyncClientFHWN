@@ -23,7 +23,7 @@ namespace SyncClient.MenuEntries
         {
             Functions.WriteHeadLine("Sync Folders");
 
-            SyncTasks.ShowSyncDiretories();
+            SyncClient.ShowSyncDiretories();
 
             Functions.PressAnyKeyToContinue();
         }

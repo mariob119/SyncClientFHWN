@@ -15,7 +15,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace SyncClient
 {
-    class SyncTasks
+    class SyncClient
     {
         public static List<SyncTask>? Tasks { get; private set; }
 
@@ -32,7 +32,7 @@ namespace SyncClient
         private List<char> LocicalDrives;
 
 
-        public SyncTasks()
+        public SyncClient()
         {
             Jobs = new Dictionary<string, ConcurrentQueue<IJob>>();
             LocicalDrives = new List<char>();
@@ -64,7 +64,7 @@ namespace SyncClient
 
         public void GetLogicalDrives()
         {
-            List<SyncTask> SyncConfigs = SyncTasks.Tasks;
+            List<SyncTask> SyncConfigs = SyncClient.Tasks;
             List<char> DriveLetters = new List<char>();
             SyncConfigs.FindAll(entry => Char.IsLetter(entry.SourceDiretory[0])).ToList().ForEach(entry => DriveLetters.Add(entry.SourceDiretory[0]));
             SyncConfigs.ForEach(entry => entry.TargetDirectories.FindAll(entry => Char.IsLetter(entry[0])).ToList().ForEach(entry => DriveLetters.Add(entry[0])));
@@ -73,8 +73,8 @@ namespace SyncClient
         public void RegenerateLogicalDriveQueues()
         {
             List<string> Paths = new List<string>();
-            SyncTasks.Tasks.Select(entry => entry.SourceDiretory).ToList().ForEach(entry => Paths.Add(entry));
-            SyncTasks.Tasks.ForEach(entry => entry.TargetDirectories.ForEach(entry => Paths.Add(entry)));
+            SyncClient.Tasks.Select(entry => entry.SourceDiretory).ToList().ForEach(entry => Paths.Add(entry));
+            SyncClient.Tasks.ForEach(entry => entry.TargetDirectories.ForEach(entry => Paths.Add(entry)));
             List<string> UniqueDriveLetters = Paths.Select(entry => entry[0].ToString()).ToList().Distinct().ToList();
             List<string> DriveLettersWhichAreNotInQueues = UniqueDriveLetters.Where(entry => !Jobs.ToList().Any(entry2 => entry2.Key == entry)).ToList();
             DriveLettersWhichAreNotInQueues.ForEach(entry => Jobs.Add(entry, new ConcurrentQueue<IJob>()));
@@ -270,7 +270,7 @@ namespace SyncClient
             {
                 Tasks.Remove(Config);
             }
-            SyncTasks.SaveConfigurations();
+            SyncClient.SaveConfigurations();
         }
 
         // File and Folder Operations
@@ -473,7 +473,7 @@ namespace SyncClient
             ThreadPool.QueueUserWorkItem(SyncData);
         }
 
-        // Mirror all Directories of SyncTasks with Configurations
+        // Mirror all Directories of SyncClient with Configurations
 
         public static void MirrorAllDirectoriesOfSyncJobs(List<SyncTask> syncJobConfigurations)
         {

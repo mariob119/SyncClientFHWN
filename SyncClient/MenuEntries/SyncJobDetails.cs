@@ -23,7 +23,7 @@ namespace SyncClient.MenuEntries
         {
             Functions.WriteHeadLine("Sync Folder Details!");
 
-            switch (SyncTasks.GetAmountOfSyncJobs())
+            switch (SyncClient.GetAmountOfSyncJobs())
             {
                 case 1:
                     {
@@ -44,18 +44,18 @@ namespace SyncClient.MenuEntries
         }
         private static void ShowOneSyncJob()
         {
-            SyncTasks.ShowDirectoryDetails(0);
+            SyncClient.ShowDirectoryDetails(0);
             Console.WriteLine("\nThere is exactly one root directory configured, which is shown aboth!");
             Functions.PressAnyKeyToContinue();
         }
         private static void ShowAllSyncJobs()
         {
-            SyncTasks.ShowSyncDiretories();
+            SyncClient.ShowSyncDiretories();
             Console.Write("\nEnter a sync job number for viewing its details: ");
-            int SyncJobNumber = Functions.GetNumberBetween(0, SyncTasks.GetAmountOfSyncJobs() + 1) - 1;
+            int SyncJobNumber = Functions.GetNumberBetween(0, SyncClient.GetAmountOfSyncJobs() + 1) - 1;
             Console.Clear();
             Functions.WriteHeadLine("Sync Folder Details!");
-            SyncTasks.ShowDirectoryDetails(SyncJobNumber);
+            SyncClient.ShowDirectoryDetails(SyncJobNumber);
             Functions.PressAnyKeyToContinue();
         }
         private static void ThereAreNoSyncJobs()

@@ -31,7 +31,7 @@ namespace SyncClient.MenuEntries
             config.SetSourceDirectory(RootDirectory);
 
             List<string> TargetDirectories = new List<string>();
-            foreach (SyncTask syncJobConfiguration in SyncTasks.Tasks)
+            foreach (SyncTask syncJobConfiguration in SyncClient.Tasks)
             {
                 foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
                 {
@@ -74,11 +74,11 @@ namespace SyncClient.MenuEntries
                 config.AddExcludedDirectory(Functions.EnterADirectoryWithPrefix(config.GetSourceDirectory()));
             }
 
-            SyncTasks.AddConfiguration(config);
-            SyncTasks.SaveConfigurations();
-            SyncTasks.RefreshSyncJobs();
-            Console.WriteLine($"\nSync Job Number {SyncTasks.Tasks.Count()} has been added successfully!");
-            SyncTasks.HealthCheck();
+            SyncClient.AddConfiguration(config);
+            SyncClient.SaveConfigurations();
+            SyncClient.RefreshSyncJobs();
+            Console.WriteLine($"\nSync Job Number {SyncClient.Tasks.Count()} has been added successfully!");
+            SyncClient.HealthCheck();
             Functions.PressAnyKeyToContinue();
         }
     }

@@ -8,19 +8,19 @@ namespace SyncClient
     {
         static void Main(string[] args)
         {
-            SyncTasks Jobs = new SyncTasks();
+            SyncClient Jobs = new SyncClient();
 
             LoggingConsole.Run();
 
-            SyncTasks.LoadConfigurations();
+            SyncClient.LoadConfigurations();
 
 
-            //SyncTasks.HealthCheck();
-            //SyncTasks.SynchronizeDirectories();
+            //SyncClient.HealthCheck();
+            //SyncClient.SynchronizeDirectories();
 
             MainMenu.Run();
 
-            SyncTasks.SaveConfigurations();
+            SyncClient.SaveConfigurations();
             LoggingConsole.Stop();
         }
     }
