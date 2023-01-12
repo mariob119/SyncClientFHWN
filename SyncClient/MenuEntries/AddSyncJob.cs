@@ -75,7 +75,7 @@ namespace SyncClient.MenuEntries
             }
 
             SyncClient.AddConfiguration(config);
-            SyncClient.SaveConfigurations();
+            SyncClient.SaveEverything();
             SyncClient.RefreshSyncJobs();
             Console.WriteLine($"\nSync Job Number {SyncClient.Tasks.Count()} has been added successfully!");
             SyncClient.HealthCheck();

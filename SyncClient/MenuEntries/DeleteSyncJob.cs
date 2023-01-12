@@ -51,7 +51,7 @@ namespace SyncClient.MenuEntries
             {
                 SyncClient.Tasks.RemoveAt(0);
                 Console.WriteLine("\nSync job has been removed successfully!");
-                SyncClient.SaveConfigurations();
+                SyncClient.SaveEverything();
                 SyncClient.RefreshSyncJobs();
             } 
             else
@@ -71,7 +71,7 @@ namespace SyncClient.MenuEntries
             {
                 SyncClient.Tasks.RemoveAt(SyncJobNumber);
                 Console.WriteLine("\nSync job has been removed successfully!");
-                SyncClient.SaveConfigurations();
+                SyncClient.SaveEverything();
                 SyncClient.RefreshSyncJobs();
             }
             else

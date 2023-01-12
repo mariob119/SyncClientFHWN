@@ -17,71 +17,130 @@ namespace SyncClient
 {
     class SyncClient
     {
-        public static List<SyncTask>? Tasks { get; private set; }
-
-        private static ConcurrentQueue<JobInstruction>? JobInstructions;
-        private static List<FileSystemWatcher>? FileSystemWatchers;
+        // Old
         private static Timer? ScanDirectoriesTimer;
-        public static ClientConfig? Configurations { get; set; }
+        private static List<FileSystemWatcher>? FileSystemWatchers;
+        private static ConcurrentQueue<JobInstruction>? JobInstructions;
 
-
-
-
-        public Dictionary<string, ConcurrentQueue<IJob>>? Jobs;
-
+        // New
+        public static List<SyncTask>? Tasks { get; private set; }
+        public Dictionary<string, ConcurrentQueue<IJob>>? Jobs { get; private set; }
+        public ConcurrentQueue<string> LogMessages { get; set; }
         private List<char> LocicalDrives;
-
+        public static ClientConfig? Configuration { get; set; }
 
         public SyncClient()
         {
+            // Old
+            JobInstructions = new ConcurrentQueue<JobInstruction>();
+            FileSystemWatchers = new List<FileSystemWatcher>();
+
+            // New
+            Tasks = new List<SyncTask>();
+            Configuration = new ClientConfig();
             Jobs = new Dictionary<string, ConcurrentQueue<IJob>>();
             LocicalDrives = new List<char>();
+            LogMessages = new ConcurrentQueue<string>();
 
             Jobs.Add("NoParallelSync", new ConcurrentQueue<IJob>());
         }
 
-        public static void Init()
+        // Configurations
+
+        public void Init()
         {
-            Tasks = new List<SyncTask>();
-            JobInstructions = new ConcurrentQueue<JobInstruction>();
-            FileSystemWatchers = new List<FileSystemWatcher>();
-            Configurations = new ClientConfig();
-
+            LoadSyncClientConfig();
+            LoadTasks();
+            HealthCheck();
+            SaveEverything();
+            SynchronizeDirectories();
         }
+        public static void SaveEverything()
+        {
+            SaveTasks();
+            SaveSyncClientConfig();
+        }
+        private void LoadTasks()
+        {
+            if (File.Exists("syncjobs.json"))
+            {
+                string JsonSettings = File.ReadAllText("syncjobs.json");
+                Tasks = JsonSerializer.Deserialize<List<SyncTask>>(JsonSettings)!;
+            }
+        }
+        private void LoadSyncClientConfig()
+        {
+            if (File.Exists("configs.json"))
+            {
+                string JsonConfigurations = File.ReadAllText("configs.json");
+                Configuration = JsonSerializer.Deserialize<ClientConfig>(JsonConfigurations)!;
+            }
+            if (!Directory.Exists(Configuration.LogFilePath))
+            {
+                Configuration.LogFilePath = "ApplicationDiretory";
+            }
+            if (Configuration.LogFilePath == "ApplicationDiretory")
+            {
+                Configuration.LogFilePath = Directory.GetCurrentDirectory();
+            }
+            if (Configuration.ScanDirectoriesRepeatly)
+            {
+                ScanDirectoriesTimer = new Timer(new TimerCallback(ScanDirectories), null, 1000, Configuration.ScanDiretoriesIntervalInMillis);
+            }
+        }
+        private static void SaveTasks()
+        {
+            string JsonSettings = JsonSerializer.Serialize(Tasks);
+            File.WriteAllText("syncjobs.json", JsonSettings);
+        }
+        private static void SaveSyncClientConfig()
+        {
+            if (!Configuration.LogToDifferentPath)
+            {
+                Configuration.LogFilePath = "ApplicationDiretory";
+            }
 
-        public static void SynchronizeDirectories()
+            string Configs = JsonSerializer.Serialize(Configuration);
+            File.WriteAllText("configs.json", Configs);
+        }
+        public static void HealthCheck()
+        {
+            List<SyncTask> RemoveSyncJob = new List<SyncTask>();
+            List<string> RemoveTargetDirectories = new List<string>();
+            foreach (SyncTask Config in Tasks)
+            {
+                if (!Directory.Exists(Config.GetSourceDirectory()))
+                {
+                    RemoveSyncJob.Add(Config);
+                }
+                foreach (string TargetDirectory in Config.TargetDirectories)
+                {
+                    if (!Directory.Exists(TargetDirectory))
+                    {
+                        RemoveTargetDirectories.Add(TargetDirectory);
+                    }
+                }
+                foreach (string TargetDirectoryToRemove in RemoveTargetDirectories)
+                {
+                    Config.TargetDirectories.Remove(TargetDirectoryToRemove);
+                }
+                if (Config.TargetDirectories.Count == 0)
+                {
+                    RemoveSyncJob.Add(Config);
+                }
+            }
+            foreach (SyncTask Config in RemoveSyncJob)
+            {
+                Tasks.Remove(Config);
+            }
+            SyncClient.SaveEverything();
+        }
+        private void SynchronizeDirectories()
         {
             Thread InitSync = new Thread(ScanDirectories);
             InitSync.Start();
             StartJobWorker();
         }
-        public static void AddConfiguration(SyncTask syncJobConfiguration)
-        {
-            Tasks.Add(syncJobConfiguration);
-        }
-
-
-
-        public void GetLogicalDrives()
-        {
-            List<SyncTask> SyncConfigs = SyncClient.Tasks;
-            List<char> DriveLetters = new List<char>();
-            SyncConfigs.FindAll(entry => Char.IsLetter(entry.SourceDiretory[0])).ToList().ForEach(entry => DriveLetters.Add(entry.SourceDiretory[0]));
-            SyncConfigs.ForEach(entry => entry.TargetDirectories.FindAll(entry => Char.IsLetter(entry[0])).ToList().ForEach(entry => DriveLetters.Add(entry[0])));
-            LocicalDrives = DriveLetters.Distinct().ToList();
-        }
-        public void RegenerateLogicalDriveQueues()
-        {
-            List<string> Paths = new List<string>();
-            SyncClient.Tasks.Select(entry => entry.SourceDiretory).ToList().ForEach(entry => Paths.Add(entry));
-            SyncClient.Tasks.ForEach(entry => entry.TargetDirectories.ForEach(entry => Paths.Add(entry)));
-            List<string> UniqueDriveLetters = Paths.Select(entry => entry[0].ToString()).ToList().Distinct().ToList();
-            List<string> DriveLettersWhichAreNotInQueues = UniqueDriveLetters.Where(entry => !Jobs.ToList().Any(entry2 => entry2.Key == entry)).ToList();
-            DriveLettersWhichAreNotInQueues.ForEach(entry => Jobs.Add(entry, new ConcurrentQueue<IJob>()));
-        }
-
-
-
 
         // SyncJob Informations
 
@@ -130,6 +189,42 @@ namespace SyncClient
             }
             else { Console.WriteLine("\nFolder with this index does not exist!"); }
         }
+
+
+
+
+
+
+
+
+
+
+
+        public static void AddConfiguration(SyncTask syncJobConfiguration)
+        {
+            Tasks.Add(syncJobConfiguration);
+        }
+
+
+
+        public void GetLogicalDrives()
+        {
+            List<SyncTask> SyncConfigs = SyncClient.Tasks;
+            List<char> DriveLetters = new List<char>();
+            SyncConfigs.FindAll(entry => Char.IsLetter(entry.SourceDiretory[0])).ToList().ForEach(entry => DriveLetters.Add(entry.SourceDiretory[0]));
+            SyncConfigs.ForEach(entry => entry.TargetDirectories.FindAll(entry => Char.IsLetter(entry[0])).ToList().ForEach(entry => DriveLetters.Add(entry[0])));
+            LocicalDrives = DriveLetters.Distinct().ToList();
+        }
+        public void RegenerateLogicalDriveQueues()
+        {
+            List<string> Paths = new List<string>();
+            SyncClient.Tasks.Select(entry => entry.SourceDiretory).ToList().ForEach(entry => Paths.Add(entry));
+            SyncClient.Tasks.ForEach(entry => entry.TargetDirectories.ForEach(entry => Paths.Add(entry)));
+            List<string> UniqueDriveLetters = Paths.Select(entry => entry[0].ToString()).ToList().Distinct().ToList();
+            List<string> DriveLettersWhichAreNotInQueues = UniqueDriveLetters.Where(entry => !Jobs.ToList().Any(entry2 => entry2.Key == entry)).ToList();
+            DriveLettersWhichAreNotInQueues.ForEach(entry => Jobs.Add(entry, new ConcurrentQueue<IJob>()));
+        }
+
 
         // SyncJob Operations
 
@@ -200,78 +295,6 @@ namespace SyncClient
             return Monitor.TryEnter(_sync_locker);
         }
 
-        // Configuration Operations
-
-        public static void LoadConfigurations()
-        {
-            if (File.Exists("syncjobs.json"))
-            {
-                string JsonSettings = File.ReadAllText("syncjobs.json");
-                Tasks = JsonSerializer.Deserialize<List<SyncTask>>(JsonSettings)!;
-            }
-            if (File.Exists("configs.json"))
-            {
-                string JsonConfigurations = File.ReadAllText("configs.json");
-                Configurations = JsonSerializer.Deserialize<ClientConfig>(JsonConfigurations)!;
-            }
-            if (!Directory.Exists(Configurations.LogFilePath))
-            {
-                Configurations.LogFilePath = "ApplicationDiretory";
-            }
-            if(Configurations.LogFilePath == "ApplicationDiretory")
-            {
-                Configurations.LogFilePath = Directory.GetCurrentDirectory();
-            }
-            if (Configurations.ScanDirectoriesRepeatly)
-            {
-                ScanDirectoriesTimer = new Timer(new TimerCallback(ScanDirectories), null, 1000, Configurations.ScanDiretoriesIntervalInMillis);
-            }
-        }
-        public static void SaveConfigurations()
-        {
-            string JsonSettings = JsonSerializer.Serialize(Tasks);
-            File.WriteAllText("syncjobs.json", JsonSettings);
-
-            if (!Configurations.LogToDifferentPath)
-            {
-                Configurations.LogFilePath = "ApplicationDiretory";
-            }
-
-            string Configs = JsonSerializer.Serialize(Configurations);
-            File.WriteAllText("configs.json", Configs);
-        }
-        public static void HealthCheck()
-        {
-            List<SyncTask> RemoveSyncJob = new List<SyncTask>();
-            List<string> RemoveTargetDirectories = new List<string>();
-            foreach (SyncTask Config in Tasks)
-            {
-                if (!Directory.Exists(Config.GetSourceDirectory()))
-                {
-                    RemoveSyncJob.Add(Config);
-                }
-                foreach (string TargetDirectory in Config.TargetDirectories)
-                {
-                    if (!Directory.Exists(TargetDirectory))
-                    {
-                        RemoveTargetDirectories.Add(TargetDirectory);
-                    }
-                }
-                foreach (string TargetDirectoryToRemove in RemoveTargetDirectories)
-                {
-                    Config.TargetDirectories.Remove(TargetDirectoryToRemove);
-                }
-                if (Config.TargetDirectories.Count == 0)
-                {
-                    RemoveSyncJob.Add(Config);
-                }
-            }
-            foreach (SyncTask Config in RemoveSyncJob)
-            {
-                Tasks.Remove(Config);
-            }
-            SyncClient.SaveConfigurations();
-        }
 
         // File and Folder Operations
 
@@ -473,7 +496,7 @@ namespace SyncClient
             ThreadPool.QueueUserWorkItem(SyncData);
         }
 
-        // Mirror all Directories of SyncClient with Configurations
+        // Mirror all Directories of SyncClient with Configuration
 
         public static void MirrorAllDirectoriesOfSyncJobs(List<SyncTask> syncJobConfigurations)
         {
