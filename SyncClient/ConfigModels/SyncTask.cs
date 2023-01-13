@@ -8,7 +8,7 @@ namespace SyncClient.ConfigModels
 {
     internal class SyncTask
     {
-        public string SourceDiretory { get; set; }
+        public string SourceDirectory { get; set; }
         public List<string> TargetDirectories { get; set; }
         public bool IncludeSubdiretories { set; get; }
         public List<string> ExcludedDiretories { set; get; }
@@ -21,9 +21,9 @@ namespace SyncClient.ConfigModels
 
         public void SetSourceDirectory(string RootFolder)
         {
-            SourceDiretory = RootFolder;
+            SourceDirectory = RootFolder;
         }
-        public string GetSourceDirectory() { return SourceDiretory; }
+        public string GetSourceDirectory() { return SourceDirectory; }
         public void AddTargetDirectory(string TargetDirectory)
         {
             TargetDirectories.Add(TargetDirectory);

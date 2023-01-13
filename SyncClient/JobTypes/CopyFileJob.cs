@@ -24,7 +24,8 @@ namespace SyncClient.JobTypes
         {
             string RelativeFilePath = FullPath.Replace(SourcePath, "");
             string TargetFilePath = TargetPath + RelativeFilePath;
-            if (!File.Exists(TargetFilePath))
+            string ParentDirectoryPath = Path.GetDirectoryName(TargetFilePath);
+            if (!File.Exists(TargetFilePath) && Directory.Exists(ParentDirectoryPath))
             {
                 FileInfo fileInfo = new FileInfo(FullPath);
                 while (Functions.IsFileLocked(fileInfo)) { }
