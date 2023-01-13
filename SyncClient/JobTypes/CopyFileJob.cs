@@ -12,20 +12,25 @@ namespace SyncClient.JobTypes
         public bool IsDirectory { get; set; }
         public string SourcePath { get; set; }
         public string TargetPath { get; set; }
-        public CopyFileJob(string fullPath, string sourcePath, string targetPath)
+        public CopyFileJob(string FullPath, string SourcePath, string TargetPath)
         {
-            FullPath = fullPath;
+            this.FullPath = FullPath;
             IsDirectory = false;
-            SourcePath = sourcePath;
-            TargetPath = targetPath;
+            this.SourcePath = SourcePath;
+            this.TargetPath = TargetPath;
         }
 
         public void DoJob()
         {
             string RelativeFilePath = FullPath.Replace(SourcePath, "");
             string TargetFilePath = TargetPath + RelativeFilePath;
-            File.Copy(FullPath, TargetFilePath);
-            Logger.LogCopyFile(FullPath, TargetFilePath);
+            if (!File.Exists(TargetFilePath))
+            {
+                FileInfo fileInfo = new FileInfo(FullPath);
+                while (Functions.IsFileLocked(fileInfo)) { }
+                File.Copy(FullPath, TargetFilePath);
+                Logger.LogCopyFile(FullPath, TargetFilePath);
+            }
         }
     }
 }
