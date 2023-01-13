@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\Logging\\Logging.csproj": {}
+    "C:\\Users\\mario\\source\\repos\\SyncClientFHWN\\Logging\\Logging.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\Logging\\Logging.csproj": {
+    "C:\\Users\\mario\\source\\repos\\SyncClientFHWN\\Logging\\Logging.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\Logging\\Logging.csproj",
+        "projectUniqueName": "C:\\Users\\mario\\source\\repos\\SyncClientFHWN\\Logging\\Logging.csproj",
         "projectName": "Logging",
-        "projectPath": "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\Logging\\Logging.csproj",
+        "projectPath": "C:\\Users\\mario\\source\\repos\\SyncClientFHWN\\Logging\\Logging.csproj",
         "packagesPath": "C:\\Users\\mario\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\Logging\\obj\\",
+        "outputPath": "C:\\Users\\mario\\source\\repos\\SyncClientFHWN\\Logging\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "D:\\Programme\\MicrosoftVisualStudio\\Shared\\NuGetPackages"

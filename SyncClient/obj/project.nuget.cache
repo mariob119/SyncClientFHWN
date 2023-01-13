@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "bJ9JLHMpxVwxcMoyq+TjB9Ta6JuqgH0cRtuhOKNHRC0yyNSGKBs6R9Appzo+Kqqe1Rx+Q31aD66A5XjoHCtg9w==",
+  "dgSpecHash": "jLvITNvNWmsYJ2qlMK39LFsQAlazCzD34OahWrFlzqgcLlz+KkwJVN24xSVk8wMDj+zEqWRaMtOxruJwQwBRnA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\mario\\Source\\Repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj",
+  "projectFilePath": "C:\\Users\\mario\\source\\repos\\SyncClientFHWN\\SyncClient\\SyncClient.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mario\\.nuget\\packages\\ipc.namedpipe\\0.9.3\\ipc.namedpipe.0.9.3.nupkg.sha512",
     "C:\\Users\\mario\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\7.0.0\\microsoft.extensions.dependencyinjection.7.0.0.nupkg.sha512",

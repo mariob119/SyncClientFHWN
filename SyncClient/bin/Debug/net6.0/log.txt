@@ -813,3 +813,30 @@ To:		C:\2\test.txt
 Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
 To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
 ===============================================================
+10:44:10 ON 13.01.2023
+Copied:		C:\1\Microsoft Access Database (neu).accdb
+To:		C:\2\Microsoft Access Database (neu).accdb
+===============================================================
+10:44:10 ON 13.01.2023
+Copied:		C:\1\test.txt
+To:		C:\2\test.txt
+===============================================================
+10:44:10 ON 13.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+10:44:22 ON 13.01.2023
+Created:	C:\2\Neuer Ordner
+===============================================================
+10:44:22 ON 13.01.2023
+Copied:		C:\1\Microsoft Access Database (neu).accdb
+To:		C:\2\Microsoft Access Database (neu).accdb
+===============================================================
+10:44:22 ON 13.01.2023
+Copied:		C:\1\test.txt
+To:		C:\2\test.txt
+===============================================================
+10:44:23 ON 13.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================

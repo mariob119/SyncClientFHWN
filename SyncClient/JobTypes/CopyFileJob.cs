@@ -25,7 +25,7 @@ namespace SyncClient.JobTypes
             string RelativeFilePath = FullPath.Replace(SourcePath, "");
             string TargetFilePath = TargetPath + RelativeFilePath;
             File.Copy(FullPath, TargetFilePath);
-            Logger.Log(LoggingMessage.CopyFile(FullPath, TargetFilePath));
+            Logger.LogCopyFile(FullPath, TargetFilePath);
         }
     }
 }

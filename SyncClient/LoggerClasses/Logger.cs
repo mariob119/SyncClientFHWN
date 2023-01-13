@@ -72,5 +72,35 @@ namespace SyncClient
                 }
             }
         }
+        private static string LogMessageFormated(string Message)
+        {
+            string MessageFormated = DateTime.Now.ToString("HH:mm:ss ON dd.MM.yyyy") + "\n";
+            MessageFormated += Message;
+            MessageFormated += "===============================================================";
+            return MessageFormated;
+        }
+        public static void LogCopyFile(string SourceFileName, string TargetFileName)
+        {
+            string Message = $"Copied:\t\t{SourceFileName}\n";
+            Message += $"To:\t\t{TargetFileName}\n";
+            Log(LogMessageFormated(Message));
+        }
+
+        public static void LogDeleteFile(string TargetFileName)
+        {
+            string Message = $"Deleted:\t{TargetFileName}\n";
+            Log(LogMessageFormated(Message));
+        }
+
+        public static void LogCreateDirectory(string TargetDirectoryPath)
+        {
+            string Message = $"Created:\t{TargetDirectoryPath}\n";
+            Log(LogMessageFormated(Message));
+        }
+        public static void LogDeleteDirectory(string TargetDirectoryPath)
+        {
+            string Message = $"Deleted:\t{TargetDirectoryPath}\n";
+            Log(LogMessageFormated(Message));
+        }
     }
 }
