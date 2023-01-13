@@ -10,12 +10,24 @@ namespace SyncClient
     internal class JobQueue
     {
         public string name { get; private set; }
-        public ConcurrentQueue<IJob> Jobs { get; set; }
+        public ConcurrentQueue<IJob> SyncJobs { get; set; }
         readonly object _lock = new object();
         public JobQueue(string name)
         {
             this.name = name;
-            Jobs = new ConcurrentQueue<IJob>();
+            SyncJobs = new ConcurrentQueue<IJob>();
+        }
+        public bool TryEnter()
+        {
+            return Monitor.TryEnter(_lock);
+        }
+        public void UnLock()
+        {
+            Monitor.Exit(_lock);
+        }
+        public void Lock()
+        {
+            Monitor.Enter(_lock);
         }
     }
 }

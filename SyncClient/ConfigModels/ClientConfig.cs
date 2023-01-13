@@ -15,6 +15,7 @@ namespace SyncClient.ConfigModels
         public bool LogToDifferentPath { get; set; }
         public int ScanDiretoriesIntervalInMillis { get; set; }
         public bool ScanDirectoriesRepeatly { get; set; }
+        public bool ParallelSync { get; set; }
         public ClientConfig()
         {
             WriteToLogFile = true;
@@ -24,6 +25,7 @@ namespace SyncClient.ConfigModels
             LogToDifferentPath = false;
             ScanDiretoriesIntervalInMillis = 500;
             ScanDirectoriesRepeatly = false;
+            ParallelSync = false;
         }
     }
 }

@@ -24,7 +24,7 @@ namespace SyncClient
 
         // New
         public static List<SyncTask>? Tasks { get; private set; }
-        public static List<JobQueue> Jobs { get; set; }
+        public static ConcurrentBag<JobQueue> Jobs { get; set; }
         public static ConcurrentQueue<string> LogMessages;
         private List<char> LocicalDrives;
         public static ClientConfig? Configuration { get; set; }
@@ -38,7 +38,7 @@ namespace SyncClient
             // New
             Tasks = new List<SyncTask>();
             Configuration = new ClientConfig();
-            Jobs = new List<JobQueue>();
+            Jobs = new ConcurrentBag<JobQueue>();
             LocicalDrives = new List<char>();
             LogMessages = new ConcurrentQueue<string>();
 
@@ -54,8 +54,8 @@ namespace SyncClient
             LoadTasks();
             HealthCheck();
             SaveEverything();
-            SynchronizeDirectories();
             RefreshLogicalDriveQueues();
+            SynchronizeDirectories();
         }
         public static void SaveEverything()
         {
@@ -84,10 +84,6 @@ namespace SyncClient
             if (Configuration.LogFilePath == "ApplicationDiretory")
             {
                 Configuration.LogFilePath = Directory.GetCurrentDirectory();
-            }
-            if (Configuration.ScanDirectoriesRepeatly)
-            {
-                ScanDirectoriesTimer = new Timer(new TimerCallback(ScanDirectories), null, 1000, Configuration.ScanDiretoriesIntervalInMillis);
             }
         }
         private static void SaveTasks()
@@ -167,7 +163,7 @@ namespace SyncClient
                     Console.WriteLine($"Sync Job Number {SyncJobNumber} || Root Directory:\t{syncJobConfiguration.GetSourceDirectory()}");
                 }
             }
-            else { Console.WriteLine("There are no Sync Jobs configured at thist time!"); }
+            else { Console.WriteLine("There are no Sync SyncJobs configured at thist time!"); }
         }
         public static int GetAmountOfSyncJobs()
         {
@@ -217,12 +213,37 @@ namespace SyncClient
 
         public static void TryStartSyncing()
         {
+            foreach(JobQueue jobQueue in Jobs)
+            {
+                if (jobQueue.TryEnter())
+                {
+                    jobQueue.UnLock();
+                    Thread Work = new Thread(new ThreadStart(() => DeQueue(jobQueue.name)));
+                    Work.Start();
+                }
+            }
+        }
 
+        public static void DeQueue(string Name)
+        {
+            JobQueue jobQueue = Jobs.Where(entry => entry.name == Name).First();
+            jobQueue.Lock();
+            while (!jobQueue.SyncJobs.IsEmpty)
+            {
+                jobQueue.SyncJobs.TryDequeue(out IJob Job);
+                Job.DoJob();
+            }
+            jobQueue.UnLock();
         }
 
 
 
-      
+
+
+
+
+
+
 
 
 
@@ -286,6 +307,7 @@ namespace SyncClient
         public static void StartJobWorker()
         {
             ThreadPool.QueueUserWorkItem(SyncData);
+            TryStartSyncing();
         }
         public static void StartSyncJobs()
         {
@@ -315,7 +337,7 @@ namespace SyncClient
             {
                 string RelativeFileName = FileName.Replace(SourceDirectory, "");
                 string SourceFilePath = SourceDirectory + RelativeFileName;
-                string TargetFilePath = TargetDirectory  + RelativeFileName;
+                string TargetFilePath = TargetDirectory + RelativeFileName;
                 try
                 {
                     File.Copy(SourceFilePath, TargetFilePath, true);
@@ -367,7 +389,7 @@ namespace SyncClient
             }
         }
 
-        // Create File and Folder Jobs
+        // Create File and Folder SyncJobs
 
         private static void CreateDeleteFileQueue(string TargetDirectory, string RelativeFileName)
         {
@@ -652,11 +674,23 @@ namespace SyncClient
                 }
                 if (Add || TargetList.Count() == 0)
                 {
-                    JobInstruction jobInstruction = new JobInstruction(SourcePath, TargetPath, SourceFile.FullName);
-                    if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
+                    string DiskLetter = SourceFile.FullName.ToString()[0].ToString();
+                    // New Instruction
+                    if (Configuration.ParallelSync)
                     {
-                        JobInstructions.Enqueue(jobInstruction);
+                            Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Enqueue(new CopyFileJob(SourceFile.FullName, SourcePath, TargetPath));
                     }
+                    else
+                    {
+                        Jobs.Where(entry => entry.name == "NoParallelSync").First().SyncJobs.Enqueue(new CopyFileJob(SourceFile.FullName, SourcePath, TargetPath));
+                    }
+
+                    // Old
+                    //JobInstruction jobInstruction = new JobInstruction(SourcePath, TargetPath, SourceFile.FullName);
+                    //if (!JobInstructions.Contains<JobInstruction>(jobInstruction))
+                    //{
+                    //    JobInstructions.Enqueue(jobInstruction);
+                    //}
                 }
             }
             if (JobWorker) { StartJobWorker(); }

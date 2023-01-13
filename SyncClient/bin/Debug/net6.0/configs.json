@@ -1,1 +1,1 @@
-{"WriteToLogFile":true,"LogFileSize":10,"LogFileName":"log","LogFilePath":"ApplicationDiretory","LogToDifferentPath":false,"ScanDiretoriesIntervalInMillis":500,"ScanDirectoriesRepeatly":false}
+{"WriteToLogFile":true,"LogFileSize":10,"LogFileName":"log","LogFilePath":"ApplicationDiretory","LogToDifferentPath":false,"ScanDiretoriesIntervalInMillis":500,"ScanDirectoriesRepeatly":false,"ParallelSync":true}
