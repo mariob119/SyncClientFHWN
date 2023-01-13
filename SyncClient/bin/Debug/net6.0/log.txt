@@ -2335,3 +2335,43 @@ Deleted:	D:\1\WinRAR-ZIP-Archiv (neu).zip
 14:02:01 ON 13.01.2023
 Deleted:	D:\1\Neuer Ordner
 ===============================================================
+14:12:57 ON 13.01.2023
+Copied:		C:\1\Textdokument (neu).txt
+To:		C:\2\Textdokument (neu).txt
+===============================================================
+14:12:57 ON 13.01.2023
+Copied:		C:\1\Textdokument (neu).txt
+To:		D:\1\Textdokument (neu).txt
+===============================================================
+14:13:19 ON 13.01.2023
+Copied:		C:\1\flutter_windows_2.10.5-stable.zip
+To:		C:\2\flutter_windows_2.10.5-stable.zip
+===============================================================
+14:13:42 ON 13.01.2023
+Copied:		C:\1\flutter_windows_2.10.5-stable.zip
+To:		C:\2\flutter_windows_2.10.5-stable.zip
+===============================================================
+14:13:42 ON 13.01.2023
+Copied:		C:\1\Textdokument (neu).txt
+To:		C:\2\Textdokument (neu).txt
+===============================================================
+14:13:52 ON 13.01.2023
+Copied:		C:\1\flutter_windows_2.10.5-stable.zip
+To:		D:\1\flutter_windows_2.10.5-stable.zip
+===============================================================
+14:13:52 ON 13.01.2023
+Copied:		C:\1\Textdokument (neu).txt
+To:		D:\1\Textdokument (neu).txt
+===============================================================
+14:13:55 ON 13.01.2023
+Deleted:	C:\2\flutter_windows_2.10.5-stable.zip
+===============================================================
+14:13:55 ON 13.01.2023
+Deleted:	C:\2\Textdokument (neu).txt
+===============================================================
+14:13:55 ON 13.01.2023
+Deleted:	D:\1\flutter_windows_2.10.5-stable.zip
+===============================================================
+14:13:55 ON 13.01.2023
+Deleted:	D:\1\Textdokument (neu).txt
+===============================================================
