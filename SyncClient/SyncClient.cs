@@ -25,7 +25,7 @@ namespace SyncClient
         // New
         public static List<SyncTask>? Tasks { get; private set; }
         public static List<JobQueue> Jobs { get; set; }
-        public ConcurrentQueue<string> LogMessages { get; set; }
+        public static ConcurrentQueue<string> LogMessages;
         private List<char> LocicalDrives;
         public static ClientConfig? Configuration { get; set; }
 
@@ -49,6 +49,7 @@ namespace SyncClient
 
         public void Init()
         {
+            Logger.Init();
             LoadSyncClientConfig();
             LoadTasks();
             HealthCheck();
@@ -214,9 +215,10 @@ namespace SyncClient
             DriveLettersWhichAreNotInQueues.ForEach(entry => Jobs.Add(new JobQueue(entry)));
         }
 
+        public static void TryStartSyncing()
+        {
 
-
-
+        }
 
 
 
@@ -312,8 +314,8 @@ namespace SyncClient
             lock (_lock_copyfile)
             {
                 string RelativeFileName = FileName.Replace(SourceDirectory, "");
-                string SourceFilePath = SourceDirectory + "\\" + RelativeFileName;
-                string TargetFilePath = TargetDirectory + "\\" + RelativeFileName;
+                string SourceFilePath = SourceDirectory + RelativeFileName;
+                string TargetFilePath = TargetDirectory  + RelativeFileName;
                 try
                 {
                     File.Copy(SourceFilePath, TargetFilePath, true);
@@ -547,7 +549,6 @@ namespace SyncClient
                     }
                     DeleteAllEmptyDirectoriesWhichAreNotInSource(syncJobConfiguration.SourceDiretory, TargetDirectory, false);
                     StartJobWorker();
-
                 }
             }
         }

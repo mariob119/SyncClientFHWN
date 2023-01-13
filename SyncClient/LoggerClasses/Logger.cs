@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Linq;
@@ -9,10 +10,36 @@ namespace SyncClient
 {
     internal static class Logger
     {
-        readonly static object _lock = new object();
+        public static ConcurrentQueue<string> LogMessages;
+        readonly static object _logger_lock = new object();
+        readonly static object _log_lock = new object();
+        public static void Init()
+        {
+            LogMessages = new ConcurrentQueue<string>();
+        }
         public static void Log(string Message)
         {
-            lock (_lock)
+            LogMessages.Enqueue(Message);
+            if (Monitor.TryEnter(_log_lock))
+            {
+                Monitor.Exit(_log_lock);
+                ThreadPool.QueueUserWorkItem(DequeueLog);
+            }
+        }
+        private static void DequeueLog(object state)
+        {
+            lock (_log_lock)
+            {
+                while (!LogMessages.IsEmpty)
+                {
+                    LogMessages.TryDequeue(out string LogMessage);
+                    ExecuteLog(LogMessage);
+                }
+            }
+        }
+        private static void ExecuteLog(string Message)
+        {
+            lock (_logger_lock)
             {
                 using (NamedPipeServerStream namedPipeServer = new NamedPipeServerStream("LoggingPipe"))
                 {

@@ -475,3 +475,214 @@ To:		D:\1\\Microsoft Access Database (neu).accdb
 Copied:		C:\1\\WinRAR-ZIP-Archiv (neu).zip
 To:		D:\1\\WinRAR-ZIP-Archiv (neu).zip
 ===============================================================
+00:16:07 ON 13.01.2023
+Copied:		C:\1\\Microsoft Access Database (neu).accdb
+To:		C:\2\\Microsoft Access Database (neu).accdb
+===============================================================
+00:16:09 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+00:16:09 ON 13.01.2023
+Copied:		C:\1\\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+00:16:09 ON 13.01.2023
+Created:	C:\2\Neuer Ordner
+===============================================================
+00:18:58 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+00:22:55 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+Test
+Test
+Test
+Test
+Test
+Test
+Test
+Test
+00:30:33 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+====================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+====================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+====================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+====================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+00:34:21 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+00:38:10 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+00:39:41 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+====================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+====================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+====================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+====================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+====================
+00:44:22 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+====================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+====================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+====================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+====================
+Es geeeeeeeeeeeeeeeeeht!
+====================
+00:45:55 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+00:46:28 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+00:49:11 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+00:49:31 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+00:49:32 ON 13.01.2023
+Copied:		C:\1\\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+00:50:04 ON 13.01.2023
+Copied:		C:\1\\test.txt
+To:		C:\2\\test.txt
+===============================================================
+00:50:06 ON 13.01.2023
+Copied:		C:\1\\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+00:50:46 ON 13.01.2023
+Copied:		C:\1\test.txt
+To:		C:\2\test.txt
+===============================================================
+00:50:47 ON 13.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+test
+test
+test
+test
+test
+test
+test
+test
+01:06:17 ON 13.01.2023
+Copied:		C:\1\test.txt
+To:		C:\2\test.txt
+===============================================================
+01:06:17 ON 13.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+01:10:09 ON 13.01.2023
+Copied:		C:\1\Microsoft Access Database (neu).accdb
+To:		C:\2\Microsoft Access Database (neu).accdb
+===============================================================
+01:10:09 ON 13.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+01:10:09 ON 13.01.2023
+Copied:		C:\1\test.txt
+To:		C:\2\test.txt
+===============================================================
+01:23:30 ON 13.01.2023
+Copied:		C:\1\Microsoft Access Database (neu).accdb
+To:		C:\2\Microsoft Access Database (neu).accdb
+===============================================================
+01:23:30 ON 13.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+01:23:30 ON 13.01.2023
+Copied:		C:\1\test.txt
+To:		C:\2\test.txt
+===============================================================
+01:25:44 ON 13.01.2023
+Copied:		C:\1\Microsoft Access Database (neu).accdb
+To:		C:\2\Microsoft Access Database (neu).accdb
+===============================================================
+01:25:44 ON 13.01.2023
+Copied:		C:\1\test.txt
+To:		C:\2\test.txt
+===============================================================
+01:25:44 ON 13.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+01:25:44 ON 13.01.2023
+Created:	C:\2\Neuer Ordner
+===============================================================
+01:26:36 ON 13.01.2023
+Copied:		C:\1\Microsoft Access Database (neu).accdb
+To:		C:\2\Microsoft Access Database (neu).accdb
+===============================================================
+01:26:36 ON 13.01.2023
+Copied:		C:\1\test.txt
+To:		C:\2\test.txt
+===============================================================
+01:26:38 ON 13.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+01:26:38 ON 13.01.2023
+Created:	C:\2\Neuer Ordner
+===============================================================
+01:28:26 ON 13.01.2023
+Copied:		C:\1\Microsoft Access Database (neu).accdb
+To:		C:\2\Microsoft Access Database (neu).accdb
+===============================================================
+01:28:26 ON 13.01.2023
+Copied:		C:\1\test.txt
+To:		C:\2\test.txt
+===============================================================
+01:28:32 ON 13.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+01:28:32 ON 13.01.2023
+Created:	C:\2\Neuer Ordner
+===============================================================
