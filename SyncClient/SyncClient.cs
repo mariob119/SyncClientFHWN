@@ -385,7 +385,7 @@ namespace SyncClient
                                          | NotifyFilters.LastWrite
                                          | NotifyFilters.Security
                                          | NotifyFilters.Size;
-            watcher.Changed += OnSourceChange;
+            //watcher.Changed += OnSourceChange;
             watcher.Created += OnSourceCreate;
             watcher.Renamed += OnSourceRename;
             watcher.Deleted += OnSourceDeleted;
