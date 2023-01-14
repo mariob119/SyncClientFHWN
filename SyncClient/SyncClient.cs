@@ -363,7 +363,7 @@ namespace SyncClient
                                          | NotifyFilters.LastWrite
                                          | NotifyFilters.Security
                                          | NotifyFilters.Size;
-            //watcher.Changed += OnSourceChange;
+            watcher.Changed += OnSourceChange;
             watcher.Created += OnSourceCreate;
             watcher.Renamed += OnSourceRename;
             watcher.Deleted += OnSourceDeleted;
@@ -434,13 +434,31 @@ namespace SyncClient
                                 {
                                     if (!e.FullPath.Contains(ExcludedDiretory + "\\"))
                                     {
-                                        CreateCopyJobs(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
+                                        if (File.Exists(e.FullPath))
+                                        {
+                                            string TargetFilePath = TargetDirectory + e.FullPath.Replace(syncTask.SourceDirectory, "");
+                                            CreateDeleteFileJob(TargetFilePath);
+                                            CreateCopyFileJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
+                                        }
+                                        else
+                                        {
+                                            SynchronizeDirectories();
+                                        }
                                     }
                                 }
                             }
                             else
                             {
-                                CreateCopyJobs(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
+                                if (File.Exists(e.FullPath))
+                                {
+                                    string TargetFilePath = TargetDirectory + e.FullPath.Replace(syncTask.SourceDirectory, "");
+                                    CreateDeleteFileJob(TargetFilePath);
+                                    CreateCopyFileJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
+                                }
+                                else
+                                {
+                                    SynchronizeDirectories();
+                                }
                             }
                         }
                     }
