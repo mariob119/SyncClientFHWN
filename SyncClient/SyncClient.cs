@@ -363,7 +363,7 @@ namespace SyncClient
                                          | NotifyFilters.LastWrite
                                          | NotifyFilters.Security
                                          | NotifyFilters.Size;
-            watcher.Changed += OnSourceChange;
+            //watcher.Changed += OnSourceChange;
             watcher.Created += OnSourceCreate;
             watcher.Renamed += OnSourceRename;
             watcher.Deleted += OnSourceDeleted;
@@ -439,10 +439,6 @@ namespace SyncClient
                                             string TargetFilePath = TargetDirectory + e.FullPath.Replace(syncTask.SourceDirectory, "");
                                             CreateDeleteFileJob(TargetFilePath);
                                             CreateCopyFileJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
-                                        }
-                                        else
-                                        {
-                                            SynchronizeDirectories();
                                         }
                                     }
                                 }
@@ -639,7 +635,14 @@ namespace SyncClient
 
                         if (SourceFile.Length > SyncClient.Configuration.BlockSyncFileSize * 1000000)
                         {
-                            DoBlockSync(SourceFile.FullName, TargetFile.FullName);
+                            if (SourceFile.Length == TargetFile.Length)
+                            {
+                                DoBlockSync(SourceFile.FullName, TargetFile.FullName);
+                            }
+                            else
+                            {
+                                CreateCopyFileJob(SourceFile.FullName, SourcePath, TargetPath);
+                            }
                         }
 
                         Add = false; break;
@@ -687,6 +690,8 @@ namespace SyncClient
         }
         public static void DoBlockSync(string SourcePath, string TargetPath)
         {
+            Logger.EnqueueQueueState($"Processing || Block comparison for {Path.GetFileName(TargetPath)}");
+            Logger.LogStartBlockComparison(SourcePath, TargetPath);
             Dictionary<long, byte[]> keyValuePairs = new Dictionary<long, byte[]>();
             using (FileStream fs1r = File.OpenRead(SourcePath))
             using (FileStream fs2r = File.OpenRead(TargetPath))
@@ -754,6 +759,8 @@ namespace SyncClient
                 }
                 fs2w.Dispose();
             }
+            Logger.EnqueueQueueState($"Done || Block comparison for {Path.GetFileName(TargetPath)}");
+            Logger.LogFinishedBlockComparison(SourcePath, TargetPath);
         }
     }
 }

@@ -28,8 +28,8 @@ namespace SyncClient.JobTypes
             {
                 Logger.EnqueueQueueState(GetProcessingMessage());
                 Directory.CreateDirectory(TargetDirectory);
-                Logger.LogCreateDirectory(TargetDirectory);
                 Logger.EnqueueQueueState(GetDoneMessage());
+                Logger.LogCreateDirectory(TargetDirectory);
             }
         }
         public string GetQueuedMessage()

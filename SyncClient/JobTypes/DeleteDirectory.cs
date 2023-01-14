@@ -22,8 +22,8 @@ namespace SyncClient.JobTypes
             {
                 Logger.EnqueueQueueState(GetProcessingMessage());
                 Directory.Delete(FullPath, true);
-                Logger.LogDeleteDirectory(FullPath);
                 Logger.EnqueueQueueState(GetDoneMessage());
+                Logger.LogDeleteDirectory(FullPath);
             }
         }
         public string GetQueuedMessage()

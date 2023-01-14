@@ -31,8 +31,8 @@ namespace SyncClient.JobTypes
                 FileInfo fileInfo = new FileInfo(FullPath);
                 while (Functions.IsFileLocked(fileInfo)) { }
                 File.Copy(FullPath, TargetFilePath);
-                Logger.LogCopyFile(FullPath, TargetFilePath);
                 Logger.EnqueueQueueState(GetDoneMessage());
+                Logger.LogCopyFile(FullPath, TargetFilePath);
             }
         }
         public string GetQueuedMessage()

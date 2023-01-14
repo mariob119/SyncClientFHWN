@@ -162,5 +162,17 @@ namespace SyncClient
             string Message = $"Deleted:\t{TargetDirectoryPath}\n";
             Log(LogMessageFormated(Message));
         }
+        public static void LogStartBlockComparison(string SourceFilePath, string TargetFilePath)
+        {
+            string Message = $"Compare:\t{SourceFilePath}\n";
+            Message += $"To:\t\t{TargetFilePath}\n";
+            Log(LogMessageFormated(Message));
+        }
+        public static void LogFinishedBlockComparison(string SourceFilePath, string TargetFilePath)
+        {
+            string Message = $"Compared:\t{SourceFilePath}\n";
+            Message += $"To:\t\t{TargetFilePath}\n";
+            Log(LogMessageFormated(Message));
+        }
     }
 }

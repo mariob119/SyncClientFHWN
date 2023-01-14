@@ -21,9 +21,10 @@ namespace SyncClient.JobTypes
             {
                 Logger.EnqueueQueueState(GetProcessingMessage());
                 FileInfo fileInfo = new FileInfo(FullPath);
+                while (Functions.IsFileLocked(fileInfo)) { }
                 File.Delete(FullPath);
-                Logger.LogDeleteFile(FullPath);
                 Logger.EnqueueQueueState(GetDoneMessage());
+                Logger.LogDeleteFile(FullPath);
             }
         }
         public string GetQueuedMessage()
