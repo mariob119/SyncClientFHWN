@@ -20,6 +20,8 @@ namespace SyncClient.JobTypes
             if (File.Exists(FullPath))
             {
                 Logger.EnqueueQueueState(GetProcessingMessage());
+                Logger.WriteMessagesToScreen();
+
                 FileInfo fileInfo = new FileInfo(FullPath);
                 while (Functions.IsFileLocked(fileInfo)) { }
                 File.Delete(FullPath);

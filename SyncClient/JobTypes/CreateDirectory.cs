@@ -27,6 +27,8 @@ namespace SyncClient.JobTypes
             if (!Directory.Exists(TargetDirectory))
             {
                 Logger.EnqueueQueueState(GetProcessingMessage());
+                Logger.WriteMessagesToScreen();
+
                 Directory.CreateDirectory(TargetDirectory);
                 Logger.EnqueueQueueState(GetDoneMessage());
                 Logger.LogCreateDirectory(TargetDirectory);

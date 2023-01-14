@@ -45,18 +45,9 @@ namespace SyncClient
         {
             lock (_logger_lock)
             {
-                string PipeStringQueues = CreateQueueMessages(LastQueues);
-
                 EnqueueLogMessage(Message);
 
-                string PipeString = CreateLogMessages(LastLogs);
-
-                using (NamedPipeServerStream namedPipeServer = new NamedPipeServerStream("LoggingPipe"))
-                {
-                    namedPipeServer.WaitForConnection();
-                    byte[] bytes = Encoding.ASCII.GetBytes(PipeStringQueues + PipeString);
-                    namedPipeServer.Write(bytes);
-                }
+                WriteMessagesToScreen();
 
                 if (SyncClient.Configuration.WriteToLogFile)
                 {
@@ -80,6 +71,23 @@ namespace SyncClient
                     {
                         sw.WriteLine(Message);
                     }
+                }
+            }
+        }
+        readonly static object _lock_screen_write = new object();
+        public static void WriteMessagesToScreen()
+        {
+            lock (_lock_screen_write)
+            {
+                string PipeStringQueues = CreateQueueMessages(LastQueues);
+
+                string PipeString = CreateLogMessages(LastLogs);
+
+                using (NamedPipeServerStream namedPipeServer = new NamedPipeServerStream("LoggingPipe"))
+                {
+                    namedPipeServer.WaitForConnection();
+                    byte[] bytes = Encoding.ASCII.GetBytes(PipeStringQueues + PipeString);
+                    namedPipeServer.Write(bytes);
                 }
             }
         }
@@ -160,12 +168,6 @@ namespace SyncClient
         public static void LogDeleteDirectory(string TargetDirectoryPath)
         {
             string Message = $"Deleted:\t{TargetDirectoryPath}\n";
-            Log(LogMessageFormated(Message));
-        }
-        public static void LogStartBlockComparison(string SourceFilePath, string TargetFilePath)
-        {
-            string Message = $"Compare:\t{SourceFilePath}\n";
-            Message += $"To:\t\t{TargetFilePath}\n";
             Log(LogMessageFormated(Message));
         }
         public static void LogFinishedBlockComparison(string SourceFilePath, string TargetFilePath)

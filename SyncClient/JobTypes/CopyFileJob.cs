@@ -23,6 +23,8 @@ namespace SyncClient.JobTypes
         public void DoJob()
         {
             Logger.EnqueueQueueState(GetProcessingMessage());
+            Logger.WriteMessagesToScreen();
+
             string RelativeFilePath = FullPath.Replace(SourcePath, "");
             string TargetFilePath = TargetPath + RelativeFilePath;
             string ParentDirectoryPath = Path.GetDirectoryName(TargetFilePath);

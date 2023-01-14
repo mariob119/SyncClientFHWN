@@ -21,6 +21,8 @@ namespace SyncClient.JobTypes
             if (Directory.Exists(FullPath))
             {
                 Logger.EnqueueQueueState(GetProcessingMessage());
+                Logger.WriteMessagesToScreen();
+
                 Directory.Delete(FullPath, true);
                 Logger.EnqueueQueueState(GetDoneMessage());
                 Logger.LogDeleteDirectory(FullPath);
