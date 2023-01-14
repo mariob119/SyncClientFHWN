@@ -19,9 +19,21 @@ namespace SyncClient.JobTypes
         {
             if (File.Exists(FullPath))
             {
+                Logger.EnqueueQueueState(GetProcessingMessage());
+                FileInfo fileInfo = new FileInfo(FullPath);
                 File.Delete(FullPath);
                 Logger.LogDeleteFile(FullPath);
             }
+        }
+        public string GetQueuedMessage()
+        {
+            string Message = "Queued || Delete File " + FullPath;
+            return Message;
+        }
+        public string GetProcessingMessage()
+        {
+            string Message = "Processing || Delete File " + FullPath;
+            return Message;
         }
     }
 }

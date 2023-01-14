@@ -80,8 +80,12 @@ namespace SyncClient
         }
         private static void SaveTasks()
         {
-            string JsonSettings = JsonSerializer.Serialize(Tasks);
-            File.WriteAllText("syncjobs.json", JsonSettings);
+            FileInfo fileInfo = new FileInfo("syncjobs.json");
+            if (!Functions.IsFileLocked(fileInfo))
+            {
+                string JsonSettings = JsonSerializer.Serialize(Tasks);
+                File.WriteAllText("syncjobs.json", JsonSettings);
+            }
         }
         private static void SaveSyncClientConfig()
         {
@@ -239,6 +243,7 @@ namespace SyncClient
             {
                 if (!Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Contains(deleteFileJob))
                 {
+                    Logger.EnqueueQueueState(deleteFileJob.GetQueuedMessage());
                     Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Enqueue(deleteFileJob);
                 }
             }
@@ -246,6 +251,7 @@ namespace SyncClient
             {
                 if (!Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Contains(deleteFileJob))
                 {
+                    Logger.EnqueueQueueState(deleteFileJob.GetQueuedMessage());
                     Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Enqueue(deleteFileJob);
                 }
             }
@@ -258,6 +264,7 @@ namespace SyncClient
             {
                 if (!Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Contains(copyFileJob))
                 {
+                    Logger.EnqueueQueueState(copyFileJob.GetQueuedMessage());
                     Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Enqueue(copyFileJob);
                 }
             }
@@ -265,6 +272,7 @@ namespace SyncClient
             {
                 if (!Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Contains(copyFileJob))
                 {
+                    Logger.EnqueueQueueState(copyFileJob.GetQueuedMessage());
                     Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Enqueue(copyFileJob);
                 }
             }
@@ -277,6 +285,7 @@ namespace SyncClient
             {
                 if (!Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Contains(createDirectory))
                 {
+                    Logger.EnqueueQueueState(createDirectory.GetQueuedMessage());
                     Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Enqueue(createDirectory);
                 }
             }
@@ -284,6 +293,7 @@ namespace SyncClient
             {
                 if (!Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Contains(createDirectory))
                 {
+                    Logger.EnqueueQueueState(createDirectory.GetQueuedMessage());
                     Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Enqueue(createDirectory);
                 }
             }
@@ -296,6 +306,7 @@ namespace SyncClient
             {
                 if (!Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Contains(deleteDirectory))
                 {
+                    Logger.EnqueueQueueState(deleteDirectory.GetQueuedMessage());
                     Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Enqueue(deleteDirectory);
                 }
             }
@@ -303,6 +314,7 @@ namespace SyncClient
             {
                 if (!Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Contains(deleteDirectory))
                 {
+                    Logger.EnqueueQueueState(deleteDirectory.GetQueuedMessage());
                     Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Enqueue(deleteDirectory);
                 }
             }
@@ -351,13 +363,60 @@ namespace SyncClient
                                          | NotifyFilters.LastWrite
                                          | NotifyFilters.Security
                                          | NotifyFilters.Size;
-            watcher.Changed += OnSourceChange;
-            watcher.Created += OnSourceChange;
-            //watcher.Renamed += OnSourceChange;
+            //watcher.Changed += OnSourceChange;
+            watcher.Created += OnSourceCreate;
+            watcher.Renamed += OnSourceRename;
             watcher.Deleted += OnSourceDeleted;
             watcher.IncludeSubdirectories = syncTask.IncludeSubdiretories;
             watcher.EnableRaisingEvents = true;
             return watcher;
+        }
+        public static void OnSourceCreate(object sender, FileSystemEventArgs e)
+        {
+            try
+            {
+                foreach (SyncTask syncTask in Tasks)
+                {
+                    if (Path.GetDirectoryName(e.FullPath).Contains(syncTask.SourceDirectory))
+                    {
+                        foreach (string TargetDirectory in syncTask.TargetDirectories)
+                        {
+                            if (syncTask.ExcludedDiretories.Count > 0)
+                            {
+                                foreach (string ExcludedDiretory in syncTask.ExcludedDiretories)
+                                {
+                                    if (!e.FullPath.Contains(ExcludedDiretory + "\\"))
+                                    {
+                                        CreateCopyJobs(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                CreateCopyJobs(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
+                            }
+                        }
+                    }
+                    TryStartSyncing();
+                }
+            }
+            catch
+            {
+                TryStartSyncing();
+                RefreshTaskConfiguration();
+            }
+        }
+        public static void OnSourceRename(object sender, FileSystemEventArgs e)
+        {
+            try
+            {
+                SynchronizeDirectories();
+            }
+            catch
+            {
+                TryStartSyncing();
+                RefreshTaskConfiguration();
+            }
         }
         public static void OnSourceChange(object sender, FileSystemEventArgs e)
         {
@@ -559,6 +618,12 @@ namespace SyncClient
                     if (SourceFile.FullName.Replace(SourcePath, "") == TargetFile.FullName.Replace(TargetPath, ""))
                     {
                         SetAttributes(SourceFile.FullName, TargetFile.FullName);
+
+                        if (SourceFile.Length > SyncClient.Configuration.BlockSyncFileSize * 1000000)
+                        {
+                            DoBlockSync(SourceFile.FullName, TargetFile.FullName);
+                        }
+
                         Add = false; break;
                     }
                     else
@@ -602,5 +667,76 @@ namespace SyncClient
                 File.SetAttributes(TargetPath, File.GetAttributes(SourcePath));
             }
         }
+        public static void DoBlockSync(string SourcePath, string TargetPath)
+        {
+            Dictionary<long, byte[]> keyValuePairs = new Dictionary<long, byte[]>();
+            using (FileStream fs1r = File.OpenRead(SourcePath))
+            using (FileStream fs2r = File.OpenRead(TargetPath))
+            {
+                long BlockSize;
+                if (SyncClient.Configuration.BlockSyncBlockSize > fs1r.Length)
+                {
+                    BlockSize = fs1r.Length;
+                }
+                else
+                {
+                    BlockSize = SyncClient.Configuration.BlockSyncBlockSize;
+                }
+
+                byte[] ByteArrayFile1 = new byte[BlockSize];
+                byte[] ByteArrayFile2 = new byte[BlockSize];
+
+                long i = 0;
+
+                while (i < fs1r.Length)
+                {
+                    fs1r.Position = i;
+                    fs2r.Position = i;
+
+                    fs1r.Read(ByteArrayFile1);
+                    fs2r.Read(ByteArrayFile2);
+
+                    if (ByteArrayFile1 != ByteArrayFile2)
+                    {
+                        keyValuePairs.Add(i, ByteArrayFile1);
+                    }
+
+                    i += SyncClient.Configuration.BlockSyncBlockSize;
+                }
+
+                int file1byte;
+                int file2byte;
+                if (fs1r.Position < fs1r.Length)
+                {
+                    do
+                    {
+                        // Read one byte from each file.
+                        long Position = fs1r.Position;
+                        file1byte = fs1r.ReadByte();
+                        file2byte = fs2r.ReadByte();
+
+                        if (file1byte != file2byte)
+                        {
+                            keyValuePairs.Add(Position, BitConverter.GetBytes(file1byte));
+                        }
+                        file2byte = file1byte;
+                    }
+
+                    while ((file1byte == file2byte) && (file1byte != -1));
+                }
+                fs1r.Dispose();
+                fs2r.Dispose();
+            }
+            using (FileStream fs2w = File.OpenWrite(TargetPath))
+            {
+                foreach (var kv in keyValuePairs)
+                {
+                    fs2w.Position = kv.Key;
+                    fs2w.Write(kv.Value);
+                }
+                fs2w.Dispose();
+            }
+        }
     }
 }
+

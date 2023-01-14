@@ -20,9 +20,20 @@ namespace SyncClient.JobTypes
         {
             if (Directory.Exists(FullPath))
             {
+                Logger.EnqueueQueueState(GetProcessingMessage());
                 Directory.Delete(FullPath, true);
                 Logger.LogDeleteDirectory(FullPath);
             }
+        }
+        public string GetQueuedMessage()
+        {
+            string Message = "Queued || Delete Directory " + FullPath;
+            return Message;
+        }
+        public string GetProcessingMessage()
+        {
+            string Message = "Processing || Delete Directory " + FullPath;
+            return Message;
         }
     }
 }

@@ -16,6 +16,10 @@ namespace SyncClient.ConfigModels
         public int ScanDiretoriesIntervalInMillis { get; set; }
         public bool ScanDirectoriesRepeatly { get; set; }
         public bool ParallelSync { get; set; }
+        public int VisualisedQueues { get; set; }
+        public int VisualisedLogs { get; set; }
+        public long BlockSyncFileSize { get; set; }
+        public long BlockSyncBlockSize { get; set; }
         public ClientConfig()
         {
             WriteToLogFile = true;
@@ -25,7 +29,11 @@ namespace SyncClient.ConfigModels
             LogToDifferentPath = false;
             ScanDiretoriesIntervalInMillis = 500;
             ScanDirectoriesRepeatly = false;
-            ParallelSync = false;
+            ParallelSync = true;
+            VisualisedQueues = 5;
+            VisualisedLogs = 5;
+            BlockSyncFileSize = 1;
+            BlockSyncBlockSize = 10;
         }
     }
 }

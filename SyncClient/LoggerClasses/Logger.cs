@@ -11,11 +11,15 @@ namespace SyncClient
     internal static class Logger
     {
         public static ConcurrentQueue<string> LogMessages;
+        public static ConcurrentQueue<string> LastQueues;
+        public static ConcurrentQueue<string> LastLogs;
         readonly static object _logger_lock = new object();
         readonly static object _log_lock = new object();
         public static void Init()
         {
             LogMessages = new ConcurrentQueue<string>();
+            LastQueues = new ConcurrentQueue<string>();
+            LastLogs = new ConcurrentQueue<string>();
         }
         public static void Log(string Message)
         {
@@ -41,12 +45,19 @@ namespace SyncClient
         {
             lock (_logger_lock)
             {
+                string PipeStringQueues = CreateQueueMessages(LastQueues);
+
+                EnqueueLogMessage(Message);
+
+                string PipeString = CreateLogMessages(LastLogs);
+
                 using (NamedPipeServerStream namedPipeServer = new NamedPipeServerStream("LoggingPipe"))
                 {
                     namedPipeServer.WaitForConnection();
-                    byte[] bytes = Encoding.ASCII.GetBytes(Message);
+                    byte[] bytes = Encoding.ASCII.GetBytes(PipeStringQueues + PipeString);
                     namedPipeServer.Write(bytes);
                 }
+
                 if (SyncClient.Configuration.WriteToLogFile)
                 {
                     if (!File.Exists("log.txt"))
@@ -71,6 +82,55 @@ namespace SyncClient
                     }
                 }
             }
+        }
+        private static string CreateQueueMessages(ConcurrentQueue<string> Queues)
+        {
+            string PipeStringQueues = "\t\tQueue-States\n";
+            IEnumerable<string> enumerableThing = LastQueues;
+            foreach (string LastQueueState in enumerableThing.Reverse())
+            {
+                PipeStringQueues += "\n" + LastQueueState;
+            }
+            return PipeStringQueues;
+        }
+        private static string CreateLogMessages(ConcurrentQueue<string> LastLogMessages)
+        {
+            string PipeString = "\n\n\t\tLogs\n";
+
+            foreach (string LogMessage in LastLogMessages)
+            {
+                PipeString += "\n" + LogMessage;
+            }
+
+            return PipeString;
+        }
+        public static void EnqueueQueueState(string Message)
+        {
+            if (LastQueues.Count() < SyncClient.Configuration.VisualisedQueues)
+            {
+                LastQueues.Enqueue(Message);
+            }
+            else
+            {
+                LastQueues.Enqueue(Message);
+                LastQueues.TryDequeue(out string OutMessage);
+            }
+        }
+        public static void EnqueueLogMessage(string Message)
+        {
+            if (LastLogs.Count() < SyncClient.Configuration.VisualisedLogs)
+            {
+                LastLogs.Enqueue(Message);
+            }
+            else
+            {
+                LastLogs.Enqueue(Message);
+                LastLogs.TryDequeue(out string OutMessage);
+            }
+        }
+        public static void LogStartMessage()
+        {
+
         }
         private static string LogMessageFormated(string Message)
         {

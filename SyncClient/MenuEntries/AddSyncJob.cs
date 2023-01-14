@@ -26,9 +26,9 @@ namespace SyncClient.MenuEntries
 
             SyncTask config = new SyncTask();
 
-            Console.WriteLine("Enter a root direcotry:");
-            string RootDirectory = Functions.EnterAValidDirectory();
-            config.SetSourceDirectory(RootDirectory);
+            Console.WriteLine("Enter a source direcotry:");
+            string SourceDirectory = Functions.EnterAValidDirectory();
+            config.SetSourceDirectory(SourceDirectory);
 
             List<string> TargetDirectories = new List<string>();
             foreach (SyncTask syncJobConfiguration in SyncClient.Tasks)
@@ -41,7 +41,7 @@ namespace SyncClient.MenuEntries
 
             Console.Write("Enter how many target directories you want to add: ");
             int NumberOfTargetDirectories = Functions.GetAPositiveNumber();
-            for(int i = 1; i < NumberOfTargetDirectories+1; i++)
+            for (int i = 1; i < NumberOfTargetDirectories + 1; i++)
             {
                 Console.Write($"Enter target directory number {i}: ");
                 bool IsValid = false;
@@ -51,15 +51,19 @@ namespace SyncClient.MenuEntries
                     DirectoryPath = Functions.EnterAValidDirectory();
                     if (config.TargetDirectories.Contains(DirectoryPath))
                     {
-                        Console.WriteLine("The directory you have entered is already a target direcotry!");
+                        Console.WriteLine("The directory you have entered is already a target direcotry!\nPlease enter another directory!");
                     }
-                    else if (TargetDirectories.Contains( DirectoryPath))
+                    else if (TargetDirectories.Contains(DirectoryPath))
                     {
-                        Console.WriteLine("The target directory you have entered is already used by another job!");
+                        Console.WriteLine("The target directory you have entered is already used by another job!\nPlease enter another directory!");
+                    }
+                    else if (config.SourceDirectory == DirectoryPath)
+                    {
+                        Console.WriteLine("The source directory can not be choosen as target directory!\nPlease enter another directory!");
                     }
                     else { IsValid = true; }
                 }
-                
+
                 config.AddTargetDirectory(DirectoryPath);
             }
 

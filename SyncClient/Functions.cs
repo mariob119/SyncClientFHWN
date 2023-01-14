@@ -42,7 +42,7 @@ namespace SyncClient
         public static int GetNumberBetween(int Min, int Max)
         {
             int Result = GetNumber();
-            while(Result <= Min || Result >= Max)
+            while (Result <= Min || Result >= Max)
             {
                 Console.WriteLine($"Please enter a number between {Min} and {Max}");
                 Result = GetNumber();
@@ -64,7 +64,7 @@ namespace SyncClient
         public static string EnterNotEmptyString()
         {
             string? Input = Console.ReadLine();
-            while(Input == string.Empty)
+            while (Input == string.Empty)
             {
                 Console.WriteLine("Please do not enter an empty string!");
                 Input = Console.ReadLine();
@@ -84,11 +84,6 @@ namespace SyncClient
         public static string EnterADirectoryWithPrefix(string Prefix)
         {
             string Input = Prefix + "\\" + EnterNotEmptyString();
-            //while (!CheckIfDirectoryExists(Input))
-            //{
-            //    Console.Write($"Please enter a valid direcotry: {Prefix}\\");
-            //    Input = Prefix + "\\" + EnterNotEmptyString();
-            //}
             return Input;
         }
         public static bool CheckIfDirectoryExists(string DirectoryPath)
@@ -103,7 +98,7 @@ namespace SyncClient
                 Console.WriteLine("Enter true or false!");
                 Input = EnterNotEmptyString();
             }
-            if(Input == "true") { return true; } else { return false; }
+            if (Input == "true") { return true; } else { return false; }
         }
         public static bool EnterYesOrNo()
         {
@@ -126,15 +121,35 @@ namespace SyncClient
             }
             catch (IOException)
             {
-                //the file is unavailable because it is:
-                //still being written to
-                //or being processed by another thread
-                //or does not exist (has already been processed)
                 return true;
             }
-
-            //file is not locked
             return false;
+        }
+        public static string ShortenFileName(string FileName)
+        {
+            string FileExtension = Path.GetExtension(FileName);
+            if (FileName.Length > 15)
+            {
+                FileName = FileName.Substring(0, 15);
+                return FileName + "..." + FileExtension;
+            }
+            else
+            {
+                return FileName;
+            }
+        }
+        public static string ShortenPath(string DirectoryPath)
+        {
+            string RootFolder = Directory.GetDirectoryRoot(DirectoryPath);
+            string ChildFolder = Path.GetDirectoryName(DirectoryPath);
+            if (DirectoryPath.Length > 15)
+            {
+                return RootFolder + "..." + ChildFolder;
+            }
+            else
+            {
+                return DirectoryPath;
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.IO.Pipes;
+﻿using System;
+using System.IO.Pipes;
 using System.Text;
 
 namespace Logging
@@ -11,10 +12,13 @@ namespace Logging
             {
                 using (NamedPipeClientStream namedPipeClient = new NamedPipeClientStream("LoggingPipe"))
                 {
-                    byte[] buffer = new byte[1024];
+                    byte[] buffer = new byte[10000];
                     namedPipeClient.Connect();
                     namedPipeClient.Read(buffer);
                     string str = Encoding.ASCII.GetString(buffer);
+                    namedPipeClient.Flush();
+                    namedPipeClient.Close();
+                    Console.Clear();
                     Console.WriteLine(str);
                 }
             }

@@ -26,9 +26,20 @@ namespace SyncClient.JobTypes
             string TargetDirectory = Targetpath + DirectoryName;
             if (!Directory.Exists(TargetDirectory))
             {
+                Logger.EnqueueQueueState(GetProcessingMessage());
                 Directory.CreateDirectory(TargetDirectory);
                 Logger.LogCreateDirectory(TargetDirectory);
             }
+        }
+        public string GetQueuedMessage()
+        {
+            string Message = "Queued || Create Directory " + Targetpath + FullPath.Replace(SourcePath, "");
+            return Message;
+        }
+        public string GetProcessingMessage()
+        {
+            string Message = "Processing || Create Directory " + Targetpath + FullPath.Replace(SourcePath, "");
+            return Message;
         }
     }
 }

@@ -22,6 +22,7 @@ namespace SyncClient.JobTypes
 
         public void DoJob()
         {
+            Logger.EnqueueQueueState(GetProcessingMessage());
             string RelativeFilePath = FullPath.Replace(SourcePath, "");
             string TargetFilePath = TargetPath + RelativeFilePath;
             string ParentDirectoryPath = Path.GetDirectoryName(TargetFilePath);
@@ -32,6 +33,18 @@ namespace SyncClient.JobTypes
                 File.Copy(FullPath, TargetFilePath);
                 Logger.LogCopyFile(FullPath, TargetFilePath);
             }
+        }
+        public string GetQueuedMessage()
+        {
+            string Message = "Queued || Copy " + Functions.ShortenFileName(Path.GetFileName(FullPath));
+            Message += " from " + Functions.ShortenPath(SourcePath) + " to " + Functions.ShortenPath(TargetPath);
+            return Message;
+        }
+        public string GetProcessingMessage()
+        {
+            string Message = "Processing || Copy " + Functions.ShortenFileName(Path.GetFileName(FullPath));
+            Message += " from " + Functions.ShortenPath(SourcePath) + " to " + Functions.ShortenPath(TargetPath);
+            return Message;
         }
     }
 }
