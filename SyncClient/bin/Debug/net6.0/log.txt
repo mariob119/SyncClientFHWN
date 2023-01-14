@@ -9933,3 +9933,35 @@ Deleted:	C:\2\test.txt
 02:29:11 ON 14.01.2023
 Created:	C:\2\Neuer Ordner
 ===============================================================
+12:10:35 ON 14.01.2023
+Copied:		C:\1\Neuer Ordner\Textdokument (neu).txt
+To:		C:\2\Neuer Ordner\Textdokument (neu).txt
+===============================================================
+12:10:47 ON 14.01.2023
+Deleted:	C:\2\Neuer Ordner
+===============================================================
+12:10:55 ON 14.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+12:10:55 ON 14.01.2023
+Deleted:	C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+12:10:55 ON 14.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+12:10:55 ON 14.01.2023
+Deleted:	C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+12:10:55 ON 14.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+12:10:55 ON 14.01.2023
+Deleted:	C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================
+12:10:55 ON 14.01.2023
+Copied:		C:\1\WinRAR-ZIP-Archiv (neu).zip
+To:		C:\2\WinRAR-ZIP-Archiv (neu).zip
+===============================================================

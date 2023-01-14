@@ -23,6 +23,7 @@ namespace SyncClient.JobTypes
                 FileInfo fileInfo = new FileInfo(FullPath);
                 File.Delete(FullPath);
                 Logger.LogDeleteFile(FullPath);
+                Logger.EnqueueQueueState(GetDoneMessage());
             }
         }
         public string GetQueuedMessage()
@@ -33,6 +34,11 @@ namespace SyncClient.JobTypes
         public string GetProcessingMessage()
         {
             string Message = "Processing || Delete File " + FullPath;
+            return Message;
+        }
+        public string GetDoneMessage()
+        {
+            string Message = "Done || Delete File " + FullPath;
             return Message;
         }
     }

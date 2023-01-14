@@ -29,6 +29,7 @@ namespace SyncClient.JobTypes
                 Logger.EnqueueQueueState(GetProcessingMessage());
                 Directory.CreateDirectory(TargetDirectory);
                 Logger.LogCreateDirectory(TargetDirectory);
+                Logger.EnqueueQueueState(GetDoneMessage());
             }
         }
         public string GetQueuedMessage()
@@ -39,6 +40,11 @@ namespace SyncClient.JobTypes
         public string GetProcessingMessage()
         {
             string Message = "Processing || Create Directory " + Targetpath + FullPath.Replace(SourcePath, "");
+            return Message;
+        }
+        public string GetDoneMessage()
+        {
+            string Message = "Done || Create Directory " + Targetpath + FullPath.Replace(SourcePath, "");
             return Message;
         }
     }

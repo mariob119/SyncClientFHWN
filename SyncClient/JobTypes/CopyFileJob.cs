@@ -32,6 +32,7 @@ namespace SyncClient.JobTypes
                 while (Functions.IsFileLocked(fileInfo)) { }
                 File.Copy(FullPath, TargetFilePath);
                 Logger.LogCopyFile(FullPath, TargetFilePath);
+                Logger.EnqueueQueueState(GetDoneMessage());
             }
         }
         public string GetQueuedMessage()
@@ -43,6 +44,12 @@ namespace SyncClient.JobTypes
         public string GetProcessingMessage()
         {
             string Message = "Processing || Copy " + Functions.ShortenFileName(Path.GetFileName(FullPath));
+            Message += " from " + Functions.ShortenPath(SourcePath) + " to " + Functions.ShortenPath(TargetPath);
+            return Message;
+        }
+        public string GetDoneMessage()
+        {
+            string Message = "Done || Copy " + Functions.ShortenFileName(Path.GetFileName(FullPath));
             Message += " from " + Functions.ShortenPath(SourcePath) + " to " + Functions.ShortenPath(TargetPath);
             return Message;
         }

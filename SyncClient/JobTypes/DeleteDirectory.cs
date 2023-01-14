@@ -23,6 +23,7 @@ namespace SyncClient.JobTypes
                 Logger.EnqueueQueueState(GetProcessingMessage());
                 Directory.Delete(FullPath, true);
                 Logger.LogDeleteDirectory(FullPath);
+                Logger.EnqueueQueueState(GetDoneMessage());
             }
         }
         public string GetQueuedMessage()
@@ -33,6 +34,11 @@ namespace SyncClient.JobTypes
         public string GetProcessingMessage()
         {
             string Message = "Processing || Delete Directory " + FullPath;
+            return Message;
+        }
+        public string GetDoneMessage()
+        {
+            string Message = "Done || Delete Directory " + FullPath;
             return Message;
         }
     }
