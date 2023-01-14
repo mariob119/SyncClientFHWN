@@ -363,7 +363,7 @@ namespace SyncClient
                                          | NotifyFilters.LastWrite
                                          | NotifyFilters.Security
                                          | NotifyFilters.Size;
-            //watcher.Changed += OnSourceChange;
+            watcher.Changed += OnSourceChange;
             watcher.Created += OnSourceCreate;
             watcher.Renamed += OnSourceRename;
             watcher.Deleted += OnSourceDeleted;
@@ -434,26 +434,32 @@ namespace SyncClient
                                 {
                                     if (!e.FullPath.Contains(ExcludedDiretory + "\\"))
                                     {
-                                        if (File.Exists(e.FullPath))
+                                        string TargetFilePath = TargetDirectory + e.FullPath.Replace(syncTask.SourceDirectory, "");
+                                        if (File.Exists(TargetFilePath))
                                         {
-                                            string TargetFilePath = TargetDirectory + e.FullPath.Replace(syncTask.SourceDirectory, "");
-                                            CreateDeleteFileJob(TargetFilePath);
-                                            CreateCopyFileJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
+                                            FileInfo fileInfoSource = new FileInfo(e.FullPath);
+                                            FileInfo fileInfoTarget = new FileInfo(TargetDirectory);
+                                            if (fileInfoSource.Length != fileInfoTarget.Length)
+                                            {
+                                                CreateDeleteFileJob(TargetFilePath);
+                                                CreateCopyFileJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
+                                            }
                                         }
                                     }
                                 }
                             }
                             else
                             {
-                                if (File.Exists(e.FullPath))
+                                string TargetFilePath = TargetDirectory + e.FullPath.Replace(syncTask.SourceDirectory, "");
+                                if (File.Exists(TargetFilePath))
                                 {
-                                    string TargetFilePath = TargetDirectory + e.FullPath.Replace(syncTask.SourceDirectory, "");
-                                    CreateDeleteFileJob(TargetFilePath);
-                                    CreateCopyFileJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
-                                }
-                                else
-                                {
-                                    SynchronizeDirectories();
+                                    FileInfo fileInfoSource = new FileInfo(e.FullPath);
+                                    FileInfo fileInfoTarget = new FileInfo(TargetDirectory);
+                                    if (fileInfoSource.Length != fileInfoTarget.Length)
+                                    {
+                                        CreateDeleteFileJob(TargetFilePath);
+                                        CreateCopyFileJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
+                                    }
                                 }
                             }
                         }
