@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+#pragma warning disable CS8602 
+
 namespace SyncClient.JobTypes
 {
     internal class CompareFilesJop : IJob
@@ -24,8 +26,6 @@ namespace SyncClient.JobTypes
         {
             string RelativeFilePath = FullPath.Replace(SourcePath, "");
             string TargetFilePath = TargetPath + RelativeFilePath;
-
-            FileInfo fileInfo = new FileInfo(FullPath);
 
             DoBlockSync(FullPath, TargetFilePath);
 
@@ -109,8 +109,6 @@ namespace SyncClient.JobTypes
 
                     while ((file1byte == file2byte) && (file1byte != -1));
                 }
-                fs1r.Dispose();
-                fs2r.Dispose();
             }
             using (FileStream fs2w = File.OpenWrite(TargetPath))
             {
@@ -119,7 +117,6 @@ namespace SyncClient.JobTypes
                     fs2w.Position = kv.Key;
                     fs2w.Write(kv.Value);
                 }
-                fs2w.Dispose();
             }
         }
     }

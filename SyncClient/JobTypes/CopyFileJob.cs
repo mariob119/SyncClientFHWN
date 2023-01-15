@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+#pragma warning disable CS8602
+
 namespace SyncClient.JobTypes
 {
     internal class CopyFileJob : IJob
@@ -27,11 +29,11 @@ namespace SyncClient.JobTypes
 
             string RelativeFilePath = FullPath.Replace(SourcePath, "");
             string TargetFilePath = TargetPath + RelativeFilePath;
-            string ParentDirectoryPath = Path.GetDirectoryName(TargetFilePath);
+            string? ParentDirectoryPath = Path.GetDirectoryName(TargetFilePath);
             if (!File.Exists(TargetFilePath) && Directory.Exists(ParentDirectoryPath))
             {
                 FileInfo fileInfo = new FileInfo(FullPath);
-                while (Functions.IsFileLocked(fileInfo)) { }
+                while (Functions.IsFileLocked(fileInfo));
                 File.Copy(FullPath, TargetFilePath);
                 Logger.EnqueueQueueState(GetDoneMessage());
                 Logger.LogCopyFile(FullPath, TargetFilePath);

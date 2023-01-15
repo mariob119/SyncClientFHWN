@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+#pragma warning disable CS8602
+
 namespace SyncClient.MenuEntries
 {
     internal static class EditConfiguration
@@ -27,8 +29,7 @@ namespace SyncClient.MenuEntries
             bool Editing = true;
             while (Editing)
             {
-                string Command = Functions.EnterNotEmptyString();
-                switch (Command)
+                switch (Functions.EnterNotEmptyString())
                 {
                     case "1":
                         Console.WriteLine("Enter a value:");

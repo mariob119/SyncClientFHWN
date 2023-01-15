@@ -6,13 +6,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+#pragma warning disable CS8602
+
 namespace SyncClient
 {
     internal static class Logger
     {
-        public static ConcurrentQueue<string> LogMessages;
-        public static ConcurrentQueue<string> LastQueues;
-        public static ConcurrentQueue<string> LastLogs;
+        private static ConcurrentQueue<string>? LogMessages;
+        private static ConcurrentQueue<string>? LastQueues;
+        private static ConcurrentQueue<string>? LastLogs;
         readonly static object _logger_lock = new object();
         readonly static object _log_lock = new object();
         public static void Init()
@@ -36,7 +38,7 @@ namespace SyncClient
             {
                 while (!LogMessages.IsEmpty)
                 {
-                    LogMessages.TryDequeue(out string LogMessage);
+                    LogMessages.TryDequeue(out string? LogMessage);
                     ExecuteLog(LogMessage);
                 }
             }
@@ -64,7 +66,7 @@ namespace SyncClient
                     }
                     if (!File.Exists(LogFilePath))
                     {
-                        File.Create(LogFilePath);
+                        File.Create(LogFilePath).Close();
                     }
                     double SizeInBytes = new FileInfo(LogFilePath).Length;
                     double FileSizeInMB = SizeInBytes / 1000000;
@@ -90,9 +92,11 @@ namespace SyncClient
         {
             lock (_lock_screen_write)
             {
+                ConcurrentQueue<string>? lastLogs = LastLogs;
+
                 string PipeStringQueues = CreateQueueMessages(LastQueues);
 
-                string PipeString = CreateLogMessages(LastLogs);
+                string PipeString = CreateLogMessages(lastLogs);
 
                 using (NamedPipeServerStream namedPipeServer = new NamedPipeServerStream("LoggingPipe"))
                 {
@@ -104,48 +108,50 @@ namespace SyncClient
         }
         private static string CreateQueueMessages(ConcurrentQueue<string> Queues)
         {
-            string PipeStringQueues = "\t\tQueue-States\n";
             IEnumerable<string> enumerableThing = Queues;
+            StringBuilder PipeStringQueues = new StringBuilder();
+            PipeStringQueues.Append("\t\tQueue-States\n");
             foreach (string LastQueueState in enumerableThing.Reverse())
             {
-                PipeStringQueues += "\n" + LastQueueState;
+                PipeStringQueues.Append($"\n{LastQueueState}");
             }
-            return PipeStringQueues;
+            return PipeStringQueues.ToString();
         }
         private static string CreateLogMessages(ConcurrentQueue<string> Messages)
         {
             IEnumerable<string> enumerableThing = Messages;
-            string PipeString = "\n\n\t\tLogs\n";
+            StringBuilder PipeString = new StringBuilder();
+            PipeString.Append("\n\n\t\tLogs\n");
 
             foreach (string LogMessage in enumerableThing.Reverse())
             {
-                PipeString += "\n" + LogMessage;
+                PipeString.Append($"\n{LogMessage}");
             }
 
-            return PipeString;
+            return PipeString.ToString();
         }
         public static void EnqueueQueueState(string Message)
         {
-            if (LastQueues.Count() < SyncClient.Configuration.VisualisedQueues)
+            if (LastQueues.Count < SyncClient.Configuration.VisualisedQueues)
             {
                 LastQueues.Enqueue(Message);
             }
             else
             {
                 LastQueues.Enqueue(Message);
-                LastQueues.TryDequeue(out string OutMessage);
+                LastQueues.TryDequeue(out string? OutMessage);
             }
         }
         public static void EnqueueLogMessage(string Message)
         {
-            if (LastLogs.Count() < SyncClient.Configuration.VisualisedLogs)
+            if (LastLogs.Count < SyncClient.Configuration.VisualisedLogs)
             {
                 LastLogs.Enqueue(Message);
             }
             else
             {
                 LastLogs.Enqueue(Message);
-                LastLogs.TryDequeue(out string OutMessage);
+                LastLogs.TryDequeue(out string? OutMessage);
             }
         }
         public static void LogStartMessage()

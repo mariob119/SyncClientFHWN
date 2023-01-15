@@ -46,7 +46,7 @@ namespace SyncClient.MenuEntries
                 Console.Write($"Enter target directory number {i}: ");
                 bool IsValid = false;
                 string DirectoryPath = String.Empty;
-                while (IsValid == false)
+                while (!IsValid)
                 {
                     DirectoryPath = Functions.EnterAValidDirectory();
                     if (config.TargetDirectories.Contains(DirectoryPath))
@@ -80,7 +80,7 @@ namespace SyncClient.MenuEntries
 
             SyncClient.AddConfiguration(config);
             SyncClient.RefreshTaskConfiguration();
-            Console.WriteLine($"\nSync Job Number {SyncClient.Tasks.Count()} has been added successfully!");
+            Console.WriteLine($"\nSync Job Number {SyncClient.Tasks.Count} has been added successfully!");
             SyncClient.HealthCheck();
             Functions.PressAnyKeyToContinue();
         }

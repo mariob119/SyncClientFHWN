@@ -13,24 +13,22 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 
+#pragma warning disable CS8602
+
 namespace SyncClient
 {
     class SyncClient
     {
         public static List<SyncTask>? Tasks { get; private set; }
-        public static List<JobQueue> Jobs { get; set; }
-        public static ConcurrentQueue<string> LogMessages;
-        private List<char> LocicalDrives;
+        public static List<JobQueue>? Jobs { get; set; }
         public static ClientConfig? Configuration { get; set; }
-        private static List<FileSystemWatcher>? FileSystemWatchers;
+        private static List<FileSystemWatcher>? FileSystemWatchers { get; set; }
 
         public SyncClient()
         {
             Tasks = new List<SyncTask>();
             Configuration = new ClientConfig();
             Jobs = new List<JobQueue>();
-            LocicalDrives = new List<char>();
-            LogMessages = new ConcurrentQueue<string>();
             FileSystemWatchers = new List<FileSystemWatcher>();
 
             Jobs.Add(new JobQueue("NoParallelSync"));
@@ -211,24 +209,21 @@ namespace SyncClient
         public static void TryStartSyncing()
         {
             Logger.WriteMessagesToScreen();
-            foreach (JobQueue jobQueue in Jobs)
+            foreach (var jobQueue in Jobs.Where(jobQueue => jobQueue.TryEnter()))
             {
-                if (jobQueue.TryEnter())
-                {
-                    jobQueue.UnLock();
-                    Thread Work = new Thread(new ThreadStart(() => DeQueue(jobQueue.name)));
-                    Work.Start();
-                }
+                jobQueue.UnLock();
+                Thread Work = new Thread(new ThreadStart(() => DeQueue(jobQueue.name)));
+                Work.Start();
             }
         }
 
         public static void DeQueue(string Name)
         {
-            JobQueue jobQueue = Jobs.Where(entry => entry.name == Name).First();
+            JobQueue jobQueue = Jobs.First(entry => entry.name == Name);
             jobQueue.Lock();
             while (!jobQueue.SyncJobs.IsEmpty)
             {
-                jobQueue.SyncJobs.TryDequeue(out IJob Job);
+                jobQueue.SyncJobs.TryDequeue(out IJob? Job);
                 Job.DoJob();
             }
             jobQueue.UnLock();
@@ -242,18 +237,18 @@ namespace SyncClient
             DeleteFileJob deleteFileJob = new DeleteFileJob(TargetFilePath);
             if (Configuration.ParallelSync && char.IsLetter(TargetFilePath[0]))
             {
-                if (!Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Contains(deleteFileJob) && File.Exists(TargetFilePath))
+                if (!Jobs.First(entry => entry.name.ToString() == DiskLetter).SyncJobs.Contains(deleteFileJob) && File.Exists(TargetFilePath))
                 {
                     Logger.EnqueueQueueState(deleteFileJob.GetQueuedMessage());
-                    Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Enqueue(deleteFileJob);
+                    Jobs.First(entry => entry.name.ToString() == DiskLetter).SyncJobs.Enqueue(deleteFileJob);
                 }
             }
             else
             {
-                if (!Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Contains(deleteFileJob) && File.Exists(TargetFilePath))
+                if (!Jobs.First(entry => entry.name.ToString() == "NoParallelSync").SyncJobs.Contains(deleteFileJob) && File.Exists(TargetFilePath))
                 {
                     Logger.EnqueueQueueState(deleteFileJob.GetQueuedMessage());
-                    Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Enqueue(deleteFileJob);
+                    Jobs.First(entry => entry.name.ToString() == "NoParallelSync").SyncJobs.Enqueue(deleteFileJob);
                 }
             }
         }
@@ -263,18 +258,18 @@ namespace SyncClient
             CopyFileJob copyFileJob = new CopyFileJob(SourceFilePath, SourcePath, TargetPath);
             if (Configuration.ParallelSync && char.IsLetter(TargetPath[0]))
             {
-                if (!Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Contains(copyFileJob))
+                if (!Jobs.First(entry => entry.name.ToString() == DiskLetter).SyncJobs.Contains(copyFileJob))
                 {
                     Logger.EnqueueQueueState(copyFileJob.GetQueuedMessage());
-                    Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Enqueue(copyFileJob);
+                    Jobs.First(entry => entry.name.ToString() == DiskLetter).SyncJobs.Enqueue(copyFileJob);
                 }
             }
             else
             {
-                if (!Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Contains(copyFileJob))
+                if (!Jobs.First(entry => entry.name.ToString() == "NoParallelSync").SyncJobs.Contains(copyFileJob))
                 {
                     Logger.EnqueueQueueState(copyFileJob.GetQueuedMessage());
-                    Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Enqueue(copyFileJob);
+                    Jobs.First(entry => entry.name.ToString() == "NoParallelSync").SyncJobs.Enqueue(copyFileJob);
                 }
             }
         }
@@ -284,18 +279,18 @@ namespace SyncClient
             CreateDirectory createDirectory = new CreateDirectory(SourceDirectoryPath, SourcePath, TargetPath);
             if (Configuration.ParallelSync && char.IsLetter(TargetPath[0]))
             {
-                if (!Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Contains(createDirectory))
+                if (!Jobs.First(entry => entry.name.ToString() == DiskLetter).SyncJobs.Contains(createDirectory))
                 {
                     Logger.EnqueueQueueState(createDirectory.GetQueuedMessage());
-                    Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Enqueue(createDirectory);
+                    Jobs.First(entry => entry.name.ToString() == DiskLetter).SyncJobs.Enqueue(createDirectory);
                 }
             }
             else
             {
-                if (!Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Contains(createDirectory))
+                if (!Jobs.First(entry => entry.name.ToString() == "NoParallelSync").SyncJobs.Contains(createDirectory))
                 {
                     Logger.EnqueueQueueState(createDirectory.GetQueuedMessage());
-                    Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Enqueue(createDirectory);
+                    Jobs.First(entry => entry.name.ToString() == "NoParallelSync").SyncJobs.Enqueue(createDirectory);
                 }
             }
         }
@@ -305,18 +300,18 @@ namespace SyncClient
             DeleteDirectory deleteDirectory = new DeleteDirectory(TargetDirectoryPath);
             if (Configuration.ParallelSync && char.IsLetter(TargetDirectoryPath[0]))
             {
-                if (!Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Contains(deleteDirectory))
+                if (!Jobs.First(entry => entry.name.ToString() == DiskLetter).SyncJobs.Contains(deleteDirectory))
                 {
                     Logger.EnqueueQueueState(deleteDirectory.GetQueuedMessage());
-                    Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Enqueue(deleteDirectory);
+                    Jobs.First(entry => entry.name.ToString() == DiskLetter).SyncJobs.Enqueue(deleteDirectory);
                 }
             }
             else
             {
-                if (!Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Contains(deleteDirectory))
+                if (!Jobs.First(entry => entry.name.ToString() == "NoParallelSync").SyncJobs.Contains(deleteDirectory))
                 {
                     Logger.EnqueueQueueState(deleteDirectory.GetQueuedMessage());
-                    Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Enqueue(deleteDirectory);
+                    Jobs.First(entry => entry.name.ToString() == "NoParallelSync").SyncJobs.Enqueue(deleteDirectory);
                 }
             }
         }
@@ -326,18 +321,18 @@ namespace SyncClient
             CompareFilesJop compareFilesJop = new CompareFilesJop(FullPath, SourcePath, TargetPath);
             if (Configuration.ParallelSync && char.IsLetter(TargetPath[0]))
             {
-                if (!Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Contains(compareFilesJop))
+                if (!Jobs.First(entry => entry.name.ToString() == DiskLetter).SyncJobs.Contains(compareFilesJop))
                 {
                     Logger.EnqueueQueueState(compareFilesJop.GetQueuedMessage());
-                    Jobs.Where(entry => entry.name.ToString() == DiskLetter).First().SyncJobs.Enqueue(compareFilesJop);
+                    Jobs.First(entry => entry.name.ToString() == DiskLetter).SyncJobs.Enqueue(compareFilesJop);
                 }
             }
             else
             {
-                if (!Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Contains(compareFilesJop))
+                if (!Jobs.First(entry => entry.name.ToString() == "NoParallelSync").SyncJobs.Contains(compareFilesJop))
                 {
                     Logger.EnqueueQueueState(compareFilesJop.GetQueuedMessage());
-                    Jobs.Where(entry => entry.name.ToString() == "NoParallelSync").First().SyncJobs.Enqueue(compareFilesJop);
+                    Jobs.First(entry => entry.name.ToString() == "NoParallelSync").SyncJobs.Enqueue(compareFilesJop);
                 }
             }
         }
@@ -501,7 +496,7 @@ namespace SyncClient
                                                 CreateDeleteFileJob(TargetFilePath);
                                                 CreateCopyFileJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
                                             }
-                                            if(fileInfoSource.Length == fileInfoTarget.Length)
+                                            if (fileInfoSource.Length == fileInfoTarget.Length)
                                             {
                                                 CreateCompareFilesJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
                                             }
@@ -565,7 +560,7 @@ namespace SyncClient
                                     TryStartSyncing();
                                 }
 
-                                while (!Directory.Exists(SubTargetDirectory)) { }
+                                while (!Directory.Exists(SubTargetDirectory));
 
                                 MirrorDirectoryContentFromSourceToTarget(SourceDirectory, SubTargetDirectory, false);
                             }
