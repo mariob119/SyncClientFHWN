@@ -18,6 +18,7 @@ namespace SyncClient
             MenuEntries.Add(DeleteSyncJob.GetMenuEntryInfo());
             MenuEntries.Add(Exit.GetMenuEntryInfo());
             MenuEntries.Add(Help.GetMenuEntryInfo());
+            MenuEntries.Add(EditConfiguration.GetMenuEntryInfo());
 
             List<String> Commands = new List<String>();
             foreach (MenuEntryInfo info in MenuEntries)
@@ -48,6 +49,10 @@ namespace SyncClient
                 if (Command == Help.GetCommand())
                 {
                     Help.MainMethode(MenuEntries);
+                }
+                if (Command == EditConfiguration.GetCommand())
+                {
+                    EditConfiguration.MainMethode();
                 }
                 if (Command == Exit.GetCommand())
                 {

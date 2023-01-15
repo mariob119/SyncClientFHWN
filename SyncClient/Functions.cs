@@ -131,7 +131,7 @@ namespace SyncClient
             if (FileName.Length > 15)
             {
                 FileName = FileName.Substring(0, 15);
-                return FileName + "..." + FileExtension;
+                return FileName + "...  *" + FileExtension;
             }
             else
             {

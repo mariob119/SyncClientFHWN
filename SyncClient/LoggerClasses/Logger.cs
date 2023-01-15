@@ -51,23 +51,34 @@ namespace SyncClient
 
                 if (SyncClient.Configuration.WriteToLogFile)
                 {
-                    if (!File.Exists("log.txt"))
+                    string LogFileDirectoryPath = String.Empty;
+                    string LogFilePath = String.Empty;
+                    if (Directory.Exists(SyncClient.Configuration.LogFilePath) && SyncClient.Configuration.LogToDifferentPath)
                     {
-                        File.Create("log.txt");
+                        LogFileDirectoryPath = SyncClient.Configuration.LogFilePath;
+                        LogFilePath = LogFileDirectoryPath + "\\" + SyncClient.Configuration.LogFileName + ".txt";
                     }
-                    double SizeInBytes = new FileInfo("log.txt").Length;
+                    else
+                    {
+                        LogFilePath = SyncClient.Configuration.LogFileName + ".txt";
+                    }
+                    if (!File.Exists(LogFilePath))
+                    {
+                        File.Create(LogFilePath);
+                    }
+                    double SizeInBytes = new FileInfo(LogFilePath).Length;
                     double FileSizeInMB = SizeInBytes / 1000000;
                     if (FileSizeInMB > SyncClient.Configuration.LogFileSize)
                     {
-                        if (File.Exists("log.txt.bak"))
+                        if (File.Exists(LogFilePath + ".bak"))
                         {
-                            File.Delete("log.txt.bak");
+                            File.Delete(LogFilePath + ".bak");
                         }
-                        File.Copy("log.txt", "log.txt.bak");
-                        File.Delete("log.txt");
-                        File.WriteAllText("log.txt", "");
+                        File.Copy(LogFilePath, LogFilePath + ".bak");
+                        File.Delete(LogFilePath);
+                        File.WriteAllText(LogFilePath, "");
                     }
-                    using (StreamWriter sw = File.AppendText("log.txt"))
+                    using (StreamWriter sw = File.AppendText(LogFilePath))
                     {
                         sw.WriteLine(Message);
                     }
@@ -94,18 +105,19 @@ namespace SyncClient
         private static string CreateQueueMessages(ConcurrentQueue<string> Queues)
         {
             string PipeStringQueues = "\t\tQueue-States\n";
-            IEnumerable<string> enumerableThing = LastQueues;
+            IEnumerable<string> enumerableThing = Queues;
             foreach (string LastQueueState in enumerableThing.Reverse())
             {
                 PipeStringQueues += "\n" + LastQueueState;
             }
             return PipeStringQueues;
         }
-        private static string CreateLogMessages(ConcurrentQueue<string> LastLogMessages)
+        private static string CreateLogMessages(ConcurrentQueue<string> Messages)
         {
+            IEnumerable<string> enumerableThing = Messages;
             string PipeString = "\n\n\t\tLogs\n";
 
-            foreach (string LogMessage in LastLogMessages)
+            foreach (string LogMessage in enumerableThing.Reverse())
             {
                 PipeString += "\n" + LogMessage;
             }
@@ -138,7 +150,19 @@ namespace SyncClient
         }
         public static void LogStartMessage()
         {
-
+            string Message = $"\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
+            Message += "Started\n";
+            Message += DateTime.Now.ToString("HH:mm:ss ON dd.MM.yyyy");
+            Message += "\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
+            Log(Message);
+        }
+        public static void LogStopMessage()
+        {
+            string Message = $"\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
+            Message += "Stopped\n";
+            Message += DateTime.Now.ToString("HH:mm:ss ON dd.MM.yyyy");
+            Message += "\n\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n";
+            Log(Message);
         }
         private static string LogMessageFormated(string Message)
         {
@@ -153,13 +177,11 @@ namespace SyncClient
             Message += $"To:\t\t{TargetFileName}\n";
             Log(LogMessageFormated(Message));
         }
-
         public static void LogDeleteFile(string TargetFileName)
         {
             string Message = $"Deleted:\t{TargetFileName}\n";
             Log(LogMessageFormated(Message));
         }
-
         public static void LogCreateDirectory(string TargetDirectoryPath)
         {
             string Message = $"Created:\t{TargetDirectoryPath}\n";

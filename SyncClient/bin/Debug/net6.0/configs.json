@@ -1,1 +1,1 @@
-{"WriteToLogFile":true,"LogFileSize":10,"LogFileName":"log","LogFilePath":"ApplicationDiretory","LogToDifferentPath":false,"ScanDiretoriesIntervalInMillis":500,"ScanDirectoriesRepeatly":false,"ParallelSync":true,"VisualisedQueues":5,"VisualisedLogs":5,"BlockSyncFileSize":1,"BlockSyncBlockSize":10}
+{"WriteToLogFile":true,"LogFileSize":10,"LogFileName":"log","LogFilePath":"ApplicationDiretory","LogToDifferentPath":false,"ParallelSync":true,"VisualisedQueues":10,"VisualisedLogs":5,"BlockSyncFileSize":5,"BlockSyncBlockSize":10}

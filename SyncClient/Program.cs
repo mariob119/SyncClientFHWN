@@ -12,9 +12,11 @@ namespace SyncClient
 
             LoggingConsole.Run();
             Client.Init();
+            Logger.LogStartMessage();
 
             MainMenu.Run();
 
+            Logger.LogStopMessage();
             SyncClient.SaveEverything();
             LoggingConsole.Stop();
 

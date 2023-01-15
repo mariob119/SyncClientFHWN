@@ -13,8 +13,6 @@ namespace SyncClient.ConfigModels
         public string LogFileName { get; set; }
         public string LogFilePath { get; set; }
         public bool LogToDifferentPath { get; set; }
-        public int ScanDiretoriesIntervalInMillis { get; set; }
-        public bool ScanDirectoriesRepeatly { get; set; }
         public bool ParallelSync { get; set; }
         public int VisualisedQueues { get; set; }
         public int VisualisedLogs { get; set; }
@@ -27,12 +25,10 @@ namespace SyncClient.ConfigModels
             LogFileName = "log";
             LogFilePath = "ApplicationDiretory";
             LogToDifferentPath = false;
-            ScanDiretoriesIntervalInMillis = 500;
-            ScanDirectoriesRepeatly = false;
             ParallelSync = true;
-            VisualisedQueues = 5;
+            VisualisedQueues = 10;
             VisualisedLogs = 5;
-            BlockSyncFileSize = 1;
+            BlockSyncFileSize = 5;
             BlockSyncBlockSize = 10;
         }
     }

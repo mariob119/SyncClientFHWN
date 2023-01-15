@@ -385,7 +385,7 @@ namespace SyncClient
                                          | NotifyFilters.LastWrite
                                          | NotifyFilters.Security
                                          | NotifyFilters.Size;
-            //watcher.Changed += OnSourceChange;
+            watcher.Changed += OnSourceChange;
             watcher.Created += OnSourceCreate;
             watcher.Renamed += OnSourceRename;
             watcher.Deleted += OnSourceDeleted;
@@ -440,6 +440,41 @@ namespace SyncClient
                 RefreshTaskConfiguration();
             }
         }
+        public static void OnSourceDeleted(object sender, FileSystemEventArgs e)
+        {
+            foreach (SyncTask syncJobConfiguration in Tasks)
+            {
+                if (Path.GetDirectoryName(e.FullPath).Contains(syncJobConfiguration.SourceDirectory))
+                {
+                    foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
+                    {
+                        string RelativeFileName = e.FullPath.Replace(syncJobConfiguration.SourceDirectory, "");
+                        string TargetPath = TargetDirectory + RelativeFileName;
+                        if (!e.FullPath.Contains("."))
+                        {
+                            CreateDeleteDirectoryJob(TargetPath);
+                        }
+                        else
+                        {
+                            CreateDeleteFileJob(TargetPath);
+                        }
+                    }
+                }
+            }
+            TryStartSyncing();
+        }
+        public static void CreateCopyJobs(string FullPath, string SourceDirectory, string TargetDirectory)
+        {
+            FileAttributes attr = File.GetAttributes(FullPath);
+            if (attr.HasFlag(FileAttributes.Directory))
+            {
+                CreateMakeDirectoryJob(FullPath, SourceDirectory, TargetDirectory);
+            }
+            else
+            {
+                CreateCopyFileJob(FullPath, SourceDirectory, TargetDirectory);
+            }
+        }
         public static void OnSourceChange(object sender, FileSystemEventArgs e)
         {
             try
@@ -466,6 +501,10 @@ namespace SyncClient
                                                 CreateDeleteFileJob(TargetFilePath);
                                                 CreateCopyFileJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
                                             }
+                                            if(fileInfoSource.Length == fileInfoTarget.Length)
+                                            {
+                                                CreateCompareFilesJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
+                                            }
                                         }
                                     }
                                 }
@@ -482,6 +521,10 @@ namespace SyncClient
                                         CreateDeleteFileJob(TargetFilePath);
                                         CreateCopyFileJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
                                     }
+                                    if (fileInfoSource.Length == fileInfoTarget.Length)
+                                    {
+                                        CreateCompareFilesJob(e.FullPath, syncTask.SourceDirectory, TargetDirectory);
+                                    }
                                 }
                             }
                         }
@@ -492,45 +535,8 @@ namespace SyncClient
             catch
             {
                 TryStartSyncing();
-                RefreshTaskConfiguration();
             }
         }
-        public static void CreateCopyJobs(string FullPath, string SourceDirectory, string TargetDirectory)
-        {
-            FileAttributes attr = File.GetAttributes(FullPath);
-            if (attr.HasFlag(FileAttributes.Directory))
-            {
-                CreateMakeDirectoryJob(FullPath, SourceDirectory, TargetDirectory);
-            }
-            else
-            {
-                CreateCopyFileJob(FullPath, SourceDirectory, TargetDirectory);
-            }
-        }
-        public static void OnSourceDeleted(object sender, FileSystemEventArgs e)
-        {
-            foreach (SyncTask syncJobConfiguration in Tasks)
-            {
-                if (Path.GetDirectoryName(e.FullPath).Contains(syncJobConfiguration.SourceDirectory))
-                {
-                    foreach (string TargetDirectory in syncJobConfiguration.TargetDirectories)
-                    {
-                        string RelativeFileName = e.FullPath.Replace(syncJobConfiguration.SourceDirectory, "");
-                        string TargetPath = TargetDirectory + RelativeFileName;
-                        if (!e.FullPath.Contains("."))
-                        {
-                            CreateDeleteDirectoryJob(TargetPath);
-                        }
-                        else
-                        {
-                            CreateDeleteFileJob(TargetPath);
-                        }
-                    }
-                }
-            }
-            TryStartSyncing();
-        }
-
         // Mirror all Directories of SyncClient with Configuration
 
         public static void MirrorAllDirectoriesOfSyncJobs(List<SyncTask> syncJobConfigurations)
@@ -661,16 +667,18 @@ namespace SyncClient
                     {
                         SetAttributes(SourceFile.FullName, TargetFile.FullName);
 
-                        if (SourceFile.Length > SyncClient.Configuration.BlockSyncFileSize * 1000000)
+                        if (SourceFile.Length == TargetFile.Length)
                         {
-                            if (SourceFile.Length == TargetFile.Length)
+                            if (SourceFile.Length > SyncClient.Configuration.BlockSyncFileSize * 1000000)
                             {
                                 CreateCompareFilesJob(SourceFile.FullName, SourcePath, TargetPath);
                             }
-                            else
-                            {
-                                CreateCopyFileJob(SourceFile.FullName, SourcePath, TargetPath);
-                            }
+                        }
+                        else
+                        {
+                            string TargetFilePath = TargetPath + SourceFile.FullName.Replace(SourcePath, "");
+                            CreateDeleteFileJob(TargetFilePath);
+                            CreateCopyFileJob(SourceFile.FullName, SourcePath, TargetPath);
                         }
 
                         Add = false; break;
