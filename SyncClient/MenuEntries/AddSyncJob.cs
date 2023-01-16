@@ -79,9 +79,10 @@ namespace SyncClient.MenuEntries
             }
 
             SyncClient.AddConfiguration(config);
-            SyncClient.RefreshTaskConfiguration();
             Console.WriteLine($"\nSync Job Number {SyncClient.Tasks.Count} has been added successfully!");
             SyncClient.HealthCheck();
+            while (!SyncClient.CheckIfJobsAreRunning());
+            SyncClient.RefreshTaskConfiguration();
             Functions.PressAnyKeyToContinue();
         }
     }
