@@ -213,13 +213,12 @@ namespace SyncClient
 
         public static void TryStartSyncing()
         {
-                Logger.WriteMessagesToScreen();
-                foreach (var jobQueue in Jobs.Where(jobQueue => jobQueue.TryEnter()))
-                {
-                    jobQueue.UnLock();
-                    Thread Work = new Thread(new ThreadStart(() => DeQueue(jobQueue.name)));
-                    Work.Start();
-                }
+            Logger.WriteMessagesToScreen();
+            foreach (var jobQueue in Jobs.Where(jobQueue => jobQueue.TryEnter()))
+            {
+                jobQueue.UnLock();
+                Task.Run(() => DeQueue(jobQueue.name));
+            }
         }
 
         public static void DeQueue(string Name)
@@ -565,7 +564,7 @@ namespace SyncClient
                                     TryStartSyncing();
                                 }
 
-                                while (!Directory.Exists(SubTargetDirectory));
+                                while (!Directory.Exists(SubTargetDirectory)) ;
 
                                 MirrorDirectoryContentFromSourceToTarget(SourceDirectory, SubTargetDirectory, false);
                             }
